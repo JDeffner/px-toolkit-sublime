@@ -7,6 +7,7 @@ import os
 import re
 
 import sublime
+from . import core
 
 LIVE_REPORTS = {}
 
@@ -64,7 +65,7 @@ def source_of(value, context_file=None, one_based=False):
     return {"file": file, "line": max(0, line - int(one_based)) if isinstance(line, int) else 0}
 
 
-def open_source(window, file, line=0, column=0, side=False):
+def open_source(window, file, line=0, column=0, side=False, utf16=False):
     if not os.path.isfile(file):
         error("Source file no longer exists: " + file)
         return None
@@ -72,8 +73,22 @@ def open_source(window, file, line=0, column=0, side=False):
         if window.num_groups() < 2:
             window.set_layout({"cols": [0.0, 0.5, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]})
         group = (window.active_group() + 1) % window.num_groups()
-        return window.open_file("{}:{}:{}".format(file, line + 1, column + 1), sublime.ENCODED_POSITION, group=group)
-    return window.open_file("{}:{}:{}".format(file, line + 1, column + 1), sublime.ENCODED_POSITION)
+        view = window.open_file("{}:{}:{}".format(file, line + 1, column + 1), sublime.ENCODED_POSITION, group=group)
+    else:
+        view = window.open_file("{}:{}:{}".format(file, line + 1, column + 1), sublime.ENCODED_POSITION)
+    if utf16:
+        def locate(buffer):
+            start = buffer.text_point(line, 0)
+            text = buffer.substr(buffer.line(start))
+            try:
+                point = start + core.utf16_offset(text, column)
+                buffer.sel().clear()
+                buffer.sel().add(sublime.Region(point))
+                buffer.show_at_center(point)
+            except ValueError:
+                message("Source position changed; opened the referenced line")
+        when_loaded(view, locate)
+    return view
 
 
 def report(window, title, data, context_file=None, one_based=False, sheet=None, refresh=None):

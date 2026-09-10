@@ -31,6 +31,12 @@ class EditorTest(unittest.TestCase):
         self.view.run_command('undo')
         self.assertEqual(self.view.size(), 0)
 
+    def test_script_comment_toggle(self):
+        self.view.assign_syntax('Packages/LSP-px/syntaxes/Paradox Script.tmLanguage')
+        self.view.run_command('px_set_text', {'text': 'test = yes'})
+        self.view.run_command('toggle_comment', {'block': False})
+        self.assertTrue(self.view.substr(sublime.Region(0, self.view.size())).startswith('#'))
+
     def test_menu_commands_exist(self):
         import sublime_plugin
         classes = sublime_plugin.window_command_classes + sublime_plugin.text_command_classes

@@ -336,7 +336,7 @@ def show_locations(window, locations):
                          "file": file, "line": pos["line"], "column": pos["character"]})
         except (KeyError, ValueError):
             continue
-    ui.pick(window, "References", rows, lambda r: ui.open_source(window, r["file"], r["line"], r["column"]))
+    ui.pick(window, "References", rows, lambda r: ui.open_source(window, r["file"], r["line"], r["column"], utf16=True))
 
 
 class PxOpenSourceCommand(sublime_plugin.WindowCommand):
@@ -742,29 +742,37 @@ class PxGuiCommand(sublime_plugin.WindowCommand):
 
 
 class PxDefinitionCommand(sublime_plugin.WindowCommand):
-    def run(self, kind=None, name=None, action="create", key=None, value=None):
-        view = self.window.active_view()
+    def run(self, kind=None, name=None, action="create", key=None, value=None, source=None):
+        view = next((v for v in self.window.views() if v.id() == source["view"]), None) if source else self.window.active_view()
         try:
-            root = active_root(self.window)
+            root = source["root"] if source else active_root(self.window)
             if not root:
                 raise ValueError("Open an editable mod first")
+            text = view.substr(sublime.Region(0, view.size())) if view else None
+            if source and text != source["text"]:
+                raise ValueError("The source changed while choosing definition properties. Reopen the command.")
+            source = {"root": root, "view": view.id() if view else None, "text": text}
+            def resume(*args):
+                self.run(*args, source=source)
             if kind is None:
                 def kinds(result):
                     rows = [{"label": "Enter definition kind", "id": None}] + [e for e in result.get("entries", []) if e.get("category") == "Definitions"]
                     def chosen(entry):
                         if entry.get("id"):
-                            self.run(entry["id"].split(":", 1)[-1], name, action, key, value)
+                            resume(entry["id"].split(":", 1)[-1], name, action, key, value)
                         else:
-                            self.window.show_input_panel("Definition kind", "", lambda text: self.run(text, name, action, key, value), None, None)
+                            self.window.show_input_panel("Definition kind", "", lambda text: resume(text, name, action, key, value), None, None)
                     ui.pick(self.window, "Definition kind", rows, chosen)
                 request(self.window, "snippetCatalogue", {}, kinds)
                 return
             if name is None:
-                self.window.show_input_panel("Definition identifier", "", lambda text: self.run(kind, text, action, key, value), None, None)
+                self.window.show_input_panel("Definition identifier", "", lambda text: resume(kind, text, action, key, value), None, None)
                 return
             if not authoring.KEY.fullmatch(name):
                 raise ValueError("Use a script identifier for the name")
             def form(data):
+                if view and (not view.is_valid() or view.substr(sublime.Region(0, view.size())) != source["text"]):
+                    raise ValueError("The source changed while the definition form loaded. Reopen the command.")
                 if not data:
                     ui.error("The server has no schema for definition kind " + kind)
                     return
@@ -775,7 +783,7 @@ class PxDefinitionCommand(sublime_plugin.WindowCommand):
                     require_editable(view)
                     if key is None:
                         rows = [dict(k, label=k["key"], detail=k.get("doc", k.get("values", ""))) for k in data.get("keys", [])]
-                        ui.pick(self.window, "Property", rows, lambda k: self.run(kind, name, action, k["key"], value))
+                        ui.pick(self.window, "Property", rows, lambda k: resume(kind, name, action, k["key"], value))
                         return
                     if value is None:
                         field = next((k for k in data["keys"] if k["key"] == key), {})
@@ -788,10 +796,10 @@ class PxDefinitionCommand(sublime_plugin.WindowCommand):
                             options += [dict(o, value=o.get("name", o.get("value", ""))) for o in data.get("options", {}).get(ref_kind, [])]
                         def custom():
                             self.window.show_input_panel("Raw script value (empty removes " + key + ")", field.get("example", ""),
-                                lambda text: self.run(kind, name, action, key, text), None, None)
+                                lambda text: resume(kind, name, action, key, text), None, None)
                         if options:
                             ui.pick(self.window, key, [{"label": "Enter a value", "custom": True}] + options,
-                                    lambda option: custom() if option.get("custom") else self.run(kind, name, action, key, option["value"]))
+                                    lambda option: custom() if option.get("custom") else resume(kind, name, action, key, option["value"]))
                         else:
                             custom()
                         return

@@ -16,6 +16,7 @@ ROOT = DATA.parents[2]
 fixture = ROOT / '.dev/fixture mod ü'
 local = json.loads((DATA / 'editor-config.json').read_text(encoding='utf-8-sig'))
 results = {'build': sublime.version(), 'checks': [], 'errors': []}
+run_id = str(int(time.time() * 1000))
 record('editor', results)
 
 
@@ -109,7 +110,7 @@ def writers():
         finally:
             module.ui.error = original
         window.focus_view(event)
-        window.run_command('px_localization', {'key': 'px_test_title', 'value': 'Testing ü 😀'})
+        window.run_command('px_localization', {'key': 'px_test_title', 'value': 'Testing ü 😀 ' + run_id})
         loc = str(fixture / 'localization/english/px_test_l_english.yml')
         wait_for(lambda: window.find_open_file(loc) and window.find_open_file(loc).is_dirty(), lambda: localization_done(loc))
     wait_for(lambda: not view.is_loading(), loaded)
@@ -142,11 +143,12 @@ def gui_done(gui):
     gui.run_command('undo')
     check('GUI undo', 'px_test_window' in gui.substr(sublime.Region(0, gui.size())))
     window.focus_view(event)
-    window.run_command('px_definition', {'kind': 'trait', 'name': 'px_created_by_test'})
-    file = str(fixture / 'common/traits/px_px_created_by_test.txt')
+    name = 'px_created_by_test_' + run_id
+    window.run_command('px_definition', {'kind': 'trait', 'name': name})
+    file = str(fixture / ('common/traits/px_' + name + '.txt'))
     def created():
         view = window.find_open_file(file)
-        check('definition generated with chosen identifier', 'px_created_by_test = {' in view.substr(sublime.Region(0, view.size())))
+        check('definition generated with chosen identifier', name + ' = {' in view.substr(sublime.Region(0, view.size())))
         view.run_command('save')
         wait_for(lambda: not view.is_dirty(), tiger_bad)
     wait_for(lambda: window.find_open_file(file) and window.find_open_file(file).is_dirty(), created)

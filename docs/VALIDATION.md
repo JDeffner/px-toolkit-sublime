@@ -17,13 +17,18 @@ This file distinguishes performed checks from configured or outstanding checks.
 - Real stdio protocol smoke against the release: initialization/version, standard editing/navigation/symbol/token/format requests, native custom read requests, GUI and definition source edits, live configuration notification, shutdown and process exit. The runner waits for the full index, not merely the first mod definitions.
 - Real Sublime integration: package load, scoped syntax, one registered session, correct resolved roots/settings, completion, hover, definition, semantic tokens, snippet catalog, buffer edit/undo, stale-edit refusal, localization BOM saved bytes and Unicode, GUI server edit and undo, HTML report creation.
 - Real Tiger output parsing with CK3 installed; file-level warnings with null positions exposed a bug, now fixed with a regression test.
+- Real Tiger invalid-property → fix → diagnostic-clear cycle and cancellation passed through package commands.
+- Guided definition creation inserted the chosen identifier using a server-generated template.
+- Managed cold installation inside Sublime passed. The verified Windows runtime fallback downloaded and ran Node successfully. Manual and managed server sessions both reached a healthy state.
+- Live hover/scope settings, external file creation/deletion and debounced open-report refresh passed in the editor.
+- Full installed CK3 index reached approximately 476,000 definitions across 6,876 indexed files.
 - Deterministic packed-package build excludes development tooling, downloaded runtime, cache, test profile and fixtures.
 
 ## CI and remaining release acceptance
 
-`.github/workflows/test.yml` runs pure/wire checks and Sublime UnitTesting on Windows, Linux and macOS. Configuration of a job is not evidence that it passed; inspect the branch's actual run.
+All six jobs passed in [run 34536598359](https://github.com/JDeffner/px-toolkit-sublime/actions/runs/34536598359): pure/wire checks and real Sublime UnitTesting on Windows, Linux and macOS. These CI editor tests check API loading, syntax resources, command registration, real buffer undo/encoding and HTML sheets; the broader end-to-end CK3/Tiger workflows were performed locally on Windows.
 
-Before a stable public tag, complete the latest packed build's integration run, Tiger fix/clear and cancellation checks, report refresh/settings/external-watch checks, managed cold/warm installation, and review platform CI. A visual check of completion/hover presentation, color swatches, inlay layout, DDS image hovers and source links remains necessary: the native screenshot helper was unavailable during this session (`failed to connect native pipe`, OS error 2).
+Before a stable public tag, visually review completion/hover presentation, color swatches, inlay layout, DDS image hovers and source-link navigation. The native screenshot helper was unavailable during this session (`failed to connect native pipe`, OS error 2). Process lifecycle and final artifact results are recorded below as they complete. No public listing or stable tag is claimed by the candidate build.
 
 There is no test here claiming in-game correctness, graphical designer parity, a multi-million-definition load test, macOS Tiger installation, or Package Control maintainer acceptance.
 

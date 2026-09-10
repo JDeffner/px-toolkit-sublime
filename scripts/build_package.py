@@ -6,7 +6,7 @@ import shutil
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-INCLUDE_DIRS = {"lib", "syntaxes", "data", "vendor", "messages"}
+INCLUDE_DIRS = {"lib", "syntaxes", "data", "vendor", "messages", "docs"}
 INCLUDE_FILES = {"plugin.py", ".python-version", "README.md", "LICENSE", "THIRD-PARTY-NOTICES.md", "CHANGELOG.md", "sublime-package.json", "messages.json"}
 
 
