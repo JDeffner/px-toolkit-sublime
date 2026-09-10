@@ -13,12 +13,14 @@ INCLUDE_FILES = {"plugin.py", ".python-version", "README.md", "LICENSE", "THIRD-
 def build(destination=None):
     target = ROOT / "dist/LSP-px.sublime-package"
     target.parent.mkdir(exist_ok=True)
-    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as archive:
+    # The package is small. Stored entries avoid zlib-version differences,
+    # giving identical checksums even across CPython/Sublime build machines.
+    with zipfile.ZipFile(target, "w", zipfile.ZIP_STORED) as archive:
         candidates = list(ROOT.iterdir())
         for directory in INCLUDE_DIRS:
             if (ROOT / directory).is_dir():
                 candidates.extend((ROOT / directory).rglob("*"))
-        for file in sorted(candidates):
+        for file in sorted(candidates, key=lambda p: p.relative_to(ROOT).as_posix()):
             rel = file.relative_to(ROOT)
             if not file.is_file() or "__pycache__" in rel.parts:
                 continue
@@ -27,7 +29,7 @@ def build(destination=None):
             info = zipfile.ZipInfo(rel.as_posix(), date_time=(2026, 9, 10, 0, 0, 0))
             info.create_system = 3
             info.external_attr = 0o100644 << 16
-            info.compress_type = zipfile.ZIP_DEFLATED
+            info.compress_type = zipfile.ZIP_STORED
             # Every included resource is text. Normalize developer working-tree
             # line endings as well as archive metadata across OS builds.
             archive.writestr(info, file.read_bytes().replace(b"\r\n", b"\n"))
