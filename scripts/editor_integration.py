@@ -14,6 +14,7 @@ import sublime
 module = importlib.import_module('LSP-px.plugin')
 ROOT = DATA.parents[2]
 fixture = ROOT / '.dev/fixture mod ü'
+local = json.loads((DATA / 'editor-config.json').read_text(encoding='utf-8-sig'))
 results = {'build': sublime.version(), 'checks': [], 'errors': []}
 record('editor', results)
 
@@ -46,9 +47,8 @@ def wait_for(predicate, callback, remaining=120):
 
 check('LSP imports', module.HAS_LSP)
 window.set_project_data({'folders': [{'path': str(fixture)}], 'settings': {'LSP': {'LSP-px': {
-    'px': {'server_command': ['C:/Program Files/nodejs/node.exe', str(ROOT / '.dev/storage/server-0.3.4/px-lsp-server-0.3.4/dist/server.js'), '--stdio'],
-           'tiger_path': 'C:/Users/ASUS/AppData/Roaming/Code/User/globalStorage/jdeffner.px-toolkit/tiger/v1.19.0/ck3-tiger.exe'},
-    'settings': {'gamePath': 'C:/Program Files (x86)/Steam/steamapps/common/Crusader Kings III/game'}
+    'px': {'server_command': [local['node'], local['server'], '--stdio'], 'tiger_path': local.get('tiger')},
+    'settings': {'gamePath': local.get('game')}
 }}}})
 event = window.open_file(str(fixture / 'events/px_events.txt'))
 

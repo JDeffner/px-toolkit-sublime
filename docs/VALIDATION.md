@@ -41,6 +41,6 @@ For local Windows editor integration:
 2. Build with `--install ".dev/sublime/Data/Installed Packages"`.
 3. Start the portable executable; wait for the harness to install LSP and its libraries. Restart the portable instance after dependencies finish installing. The harness records bootstrap results under `Data/`.
 4. `scripts/protocol_smoke.py` creates `.dev/fixture mod ü`. Its fixture includes intentionally incomplete game content suitable for navigation and diagnostics tests.
-5. Adjust the local-only runtime/game/Tiger paths at the top of `scripts/editor_integration.py`; copy to portable `Data/integration.py`; run portable `subl.exe --command px_test_run`. Inspect `Data/editor.json` for `complete: true` and no failures.
+5. Create portable `Data/editor-config.json` with absolute `node`, `server`, `game`, and optional `tiger` paths. Copy `scripts/editor_integration.py` to portable `Data/integration.py`; run portable `subl.exe --command px_test_run`. Inspect `Data/editor.json` for `complete: true` and no failures.
 
 The test harness and scripts are excluded from the public `.sublime-package`. Do not install the harness into a normal profile. CI uses the separate UnitTesting tests in `tests/test_editor.py` and requires no CK3 game assets.
