@@ -21,6 +21,7 @@ class Client:
     def __init__(self, command):
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self.messages, self.errors, self.serial = queue.Queue(), [], 0
+        self.notifications = []
         threading.Thread(target=self.read, daemon=True).start()
         threading.Thread(target=lambda: self.errors.extend(iter(self.process.stderr.readline, b'')), daemon=True).start()
 
@@ -61,6 +62,8 @@ class Client:
                 return value.get('result')
             if 'id' in value and 'method' in value:
                 self.write({'jsonrpc': '2.0', 'id': value['id'], 'result': None})
+            elif 'method' in value:
+                self.notifications.append(value)
         raise TimeoutError(method)
 
 
@@ -129,6 +132,7 @@ def main():
             ('textDocument/signatureHelp', {'textDocument': doc, 'position': pos}),
             ('textDocument/inlayHint', {'textDocument': doc, 'range': {'start': {'line': 0, 'character': 0}, 'end': core.position(text, len(text))}}),
             ('textDocument/documentColor', {'textDocument': doc}),
+            ('textDocument/colorPresentation', {'textDocument': doc, 'range': {'start': pos, 'end': pos}, 'color': {'red': 1, 'green': 0, 'blue': 0, 'alpha': 1}}),
             ('textDocument/prepareRename', {'textDocument': doc, 'position': pos}),
             ('textDocument/rename', {'textDocument': doc, 'position': pos, 'newName': 'px_test_trait_renamed'}),
             ('textDocument/codeAction', {'textDocument': doc, 'range': {'start': pos, 'end': pos}, 'context': {'diagnostics': []}}),
@@ -168,6 +172,17 @@ def main():
         settings['hoverDetail'] = 'full'
         client.send('paradox/configChanged', settings)
         check('paradox/indexStats', None)
+        client.notifications.clear()
+        client.send('textDocument/didChange', {'textDocument': dict(doc, version=2), 'contentChanges': [{'text': 'px_broken = {\n'}]})
+        for _ in range(30):
+            time.sleep(.1)
+            client.request('paradox/indexStats', None)
+            ds = [n['params'] for n in client.notifications if n['method'] == 'textDocument/publishDiagnostics' and n['params']['uri'] == doc['uri']]
+            if ds and ds[-1]['diagnostics']:
+                results['diagnostic-push'] = ds[-1]
+                break
+        else:
+            raise AssertionError('Malformed script did not publish diagnostics')
         check('shutdown', None)
         client.send('exit', None)
         client.process.wait(timeout=15)

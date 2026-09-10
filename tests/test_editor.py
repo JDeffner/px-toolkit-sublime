@@ -34,7 +34,7 @@ class EditorTest(unittest.TestCase):
     def test_menu_commands_exist(self):
         import sublime_plugin
         classes = sublime_plugin.window_command_classes + sublime_plugin.text_command_classes
-        commands = {c(None).name() for c in classes}
+        commands = {c(None).name() for c in classes if c.__module__ == self.module.__name__}
         entries = json.loads(sublime.load_resource('Packages/LSP-px/Default.sublime-commands'))
         for entry in entries:
             self.assertIn(entry['command'], commands)
