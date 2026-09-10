@@ -126,6 +126,12 @@ def main():
             ('textDocument/foldingRange', {'textDocument': doc}),
             ('textDocument/semanticTokens/full', {'textDocument': doc}),
             ('textDocument/formatting', {'textDocument': doc, 'options': {'tabSize': 4, 'insertSpaces': False}}),
+            ('textDocument/signatureHelp', {'textDocument': doc, 'position': pos}),
+            ('textDocument/inlayHint', {'textDocument': doc, 'range': {'start': {'line': 0, 'character': 0}, 'end': core.position(text, len(text))}}),
+            ('textDocument/documentColor', {'textDocument': doc}),
+            ('textDocument/prepareRename', {'textDocument': doc, 'position': pos}),
+            ('textDocument/rename', {'textDocument': doc, 'position': pos, 'newName': 'px_test_trait_renamed'}),
+            ('textDocument/codeAction', {'textDocument': doc, 'range': {'start': pos, 'end': pos}, 'context': {'diagnostics': []}}),
             ('paradox/indexStats', None), ('paradox/modOverview', {'modRoot': str(root)}),
             ('paradox/locCoverage', {'modRoot': str(root)}), ('paradox/overrides', {'modRoot': str(root)}),
             ('paradox/scopeAt', {'uri': doc['uri'], 'position': pos}),
@@ -143,11 +149,17 @@ def main():
         ]:
             check(method, params)
         assert results['textDocument/definition']['result'], 'Definition must resolve fixture trait'
+        assert results['textDocument/rename']['result'].get('changes'), 'Rename must return workspace edits'
+        wiki = results['paradox/exampleWiki']['result']
+        entry = next(e for e in wiki['entries'] if e['name'] == 'add_trait')
+        check('paradox/exampleWikiEntry', {'name': entry['name'], 'kind': entry['kind']})
         gui = root / 'gui/px_test.gui'
         gd = {'uri': gui.as_uri(), 'text': gui.read_text()}
         for method in ('guiTree', 'guiLayout', 'guiDependencies', 'guiVocabulary'):
             check('paradox/' + method, gd)
         check('paradox/guiWidgetInfo', dict(gd, line=0, placement=True))
+        check('paradox/guiPreview', dict(gd, entries=[{'name': 'window', 'kind': 'builtin'}]))
+        check('paradox/guiSaveValues', {'path': str(root / 'missing-test-save.ck3')})
         edit = check('paradox/guiSourceEdit', dict(gd, op={'kind': 'setProperties', 'line': 0, 'properties': [{'key': 'name', 'value': '"px_renamed"'}]}))
         assert edit.get('edits') and not edit.get('refused'), edit
         trait = root / 'common/traits/px_traits.txt'

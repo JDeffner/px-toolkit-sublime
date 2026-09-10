@@ -16,7 +16,7 @@ import sublime
 import sublime_plugin
 
 from .lib import core, authoring, install, tiger, ui
-from .lib.watcher import ModWatcher
+from .lib.watcher import ModWatcher, snapshot
 
 try:
     from LSP.plugin import LspPlugin, PluginStartError, Notification, Request, Promise
@@ -942,6 +942,8 @@ class PxTigerCommand(sublime_plugin.WindowCommand):
             previous.cancel()
         if cancel:
             TIGER_RUNS.pop(window_id, None)
+            for view in self.window.views():
+                view.erase_status("px_tiger")
             ui.message("Tiger cancelled")
             return
         try:
@@ -963,14 +965,20 @@ class PxTigerCommand(sublime_plugin.WindowCommand):
                     executable = tiger_executable(self.window)
                     cache = str(Path(sublime.cache_path()) / NAME / ("tiger-" + str(window_id)))
                     args = tiger.command(executable, root, settings, cache)
+                    before = snapshot([root])
                     reports = run.run(args, root, configuration(self.window).get("px", {}).get("tiger_timeout_seconds", 180))
                     if reports is None:
                         return
                     rows = tiger.diagnostics(reports, root, settings)
+                    unchanged = before == snapshot([root])
                     def publish():
                         if TIGER_RUNS.get(window_id) is not run or UNLOADING:
                             return
                         TIGER_RUNS.pop(window_id, None)
+                        if not unchanged or any(v.is_dirty() and core.under(v.file_name(), root) for v in self.window.views()):
+                            for view in self.window.views():
+                                view.set_status("px_tiger", "Tiger: source changed; rerun validation")
+                            return
                         # Preserve results from other editable mods in this window.
                         TIGER_RESULTS[window_id] = [r for r in TIGER_RESULTS.get(window_id, []) if not core.under(r["file"], root)] + rows
                         output = self.window.create_output_panel("px_tiger")
@@ -1124,6 +1132,9 @@ class PxEvents(sublime_plugin.EventListener):
         if run:
             run.cancel()
         TIGER_RESULTS.pop(window.id(), None)
+        for key in list(ui.LIVE_REPORTS):
+            if key[0] == window.id():
+                ui.LIVE_REPORTS.pop(key, None)
 
 
 def plugin_loaded():

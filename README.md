@@ -19,7 +19,7 @@ Windows x64 has been exercised locally with the real editor and CK3 installation
 
 ## Editing features
 
-The LSP supplies context completion and snippets, hover documentation, signature help, definitions, references, document/workspace symbols, guarded rename, lightweight diagnostics and code actions, folding, full semantic tokens, inlay hints, document links, color swatches/presentation conversion, and document formatting where its providers support the file type.
+The LSP supplies context completion and snippets, hover documentation, signature help, definitions, references, document/workspace symbols, guarded rename, lightweight diagnostics and code actions, folding, full semantic tokens, inlay hints, hover source links, color swatches/presentation conversion, and document formatting where its providers support the file type.
 
 Script, localization, GUI, descriptor, info and embedded datafunction grammars come from the matching upstream release. Syntax detection is restricted to recognized files in configured game/mod/dependency roots. Unrelated `.txt` and YAML files keep their syntax. Explicit syntax selections are respected; **Use Paradox Syntax** provides an override. The `_*.info` grammar does not imply script-provider parity.
 
@@ -116,7 +116,7 @@ Tiger validates **saved files**. Unsaved files prevent a run. Results use their 
 
 - Provider guards remain upstream: rename is restricted to supported mod-owned script identifiers. GUI/localization initiation, inherited/vanilla identifiers and named graphics assets are not made renameable by this package.
 - Formatting is the server's script document formatter. No range/on-type formatter, broad style controls, or equivalent GUI/localization formatter is added.
-- No call/type hierarchy, implementation/declaration/type-definition provider, semantic selection ranges, document highlights, code lenses, file-rename reference updates, or general refactoring provider exists in the pinned server.
+- No call/type hierarchy, implementation/declaration/type-definition provider, semantic selection ranges, document highlights, document-link provider, code lenses, file-rename reference updates, or general refactoring provider exists in the pinned server.
 - GUI layouts and save values are static data. There is no native JavaScript/canvas designer, live game renderer, debugger, event execution, or runtime scope inspection. Ironman/binary saves remain unsupported.
 - Theme-banner/texture paths are navigable. This package does not add DDS conversion, a graphical dynasty/event canvas, a coat-of-arms editor, Workshop publishing, or an arbitrary color picker. DDS image hover rendering still needs a visual acceptance check.
 - Signature help, completion richness and localization resolution depend on the server's knowledge and the loaded game/mod context. Missing game/log paths reduce available information.

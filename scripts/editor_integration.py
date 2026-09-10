@@ -142,6 +142,45 @@ def gui_done(gui):
     gui.run_command('undo')
     check('GUI undo', 'px_test_window' in gui.substr(sublime.Region(0, gui.size())))
     window.focus_view(event)
+    window.run_command('px_definition', {'kind': 'trait', 'name': 'px_created_by_test'})
+    file = str(fixture / 'common/traits/px_px_created_by_test.txt')
+    def created():
+        view = window.find_open_file(file)
+        check('definition generated with chosen identifier', 'px_created_by_test = {' in view.substr(sublime.Region(0, view.size())))
+        view.run_command('save')
+        wait_for(lambda: not view.is_dirty(), tiger_bad)
+    wait_for(lambda: window.find_open_file(file) and window.find_open_file(file).is_dirty(), created)
+
+
+def tiger_bad():
+    if not local.get('tiger'):
+        finish()
+        return
+    path = fixture / 'common/traits/px_tiger_test.txt'
+    path.write_text('px_tiger_test = {\n this_is_not_a_trait_property = 123\n}\n', encoding='utf-8-sig')
+    window.focus_view(event)
+    window.run_command('px_tiger')
+    def bad_done():
+        rows = module.TIGER_RESULTS.get(window.id(), [])
+        bad = [r for r in rows if r['file'] == str(path) and 'this_is_not_a_trait_property' in r['message']]
+        check('Tiger reports invalid property', bool(bad), [r for r in rows if r['file'] == str(path)])
+        path.write_text('px_tiger_test = {\n prowess = 1\n}\n', encoding='utf-8-sig')
+        window.run_command('px_tiger')
+        wait_for(lambda: window.id() not in module.TIGER_RUNS, lambda: tiger_fixed(path), 600)
+    wait_for(lambda: window.id() not in module.TIGER_RUNS, bad_done, 600)
+
+
+def tiger_fixed(path):
+    rows = module.TIGER_RESULTS.get(window.id(), [])
+    check('Tiger clears fixed diagnostic', not any(r['file'] == str(path) and 'this_is_not_a_trait_property' in r['message'] for r in rows))
+    window.run_command('px_tiger')
+    run = module.TIGER_RUNS.get(window.id())
+    window.run_command('px_tiger', {'cancel': True})
+    check('Tiger cancellation', run is not None and run.cancelled.is_set() and window.id() not in module.TIGER_RUNS)
+    finish()
+
+
+def finish():
     results['complete'] = True
     record('editor', results)
 
