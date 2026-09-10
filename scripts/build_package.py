@@ -25,8 +25,12 @@ def build(destination=None):
             if rel.parts[0] not in INCLUDE_DIRS and not (len(rel.parts) == 1 and (file.name in INCLUDE_FILES or ".sublime-" in file.name or file.suffix == ".tmPreferences")):
                 continue
             info = zipfile.ZipInfo(rel.as_posix(), date_time=(2026, 9, 10, 0, 0, 0))
+            info.create_system = 3
+            info.external_attr = 0o100644 << 16
             info.compress_type = zipfile.ZIP_DEFLATED
-            archive.writestr(info, file.read_bytes())
+            # Every included resource is text. Normalize developer working-tree
+            # line endings as well as archive metadata across OS builds.
+            archive.writestr(info, file.read_bytes().replace(b"\r\n", b"\n"))
     if destination:
         Path(destination).mkdir(parents=True, exist_ok=True)
         shutil.copy2(target, Path(destination) / target.name)
