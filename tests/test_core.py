@@ -11,11 +11,15 @@ from unittest.mock import patch
 import zipfile
 
 try:
-    from ..lib import core, authoring, install, tiger
-    from ..lib.watcher import changes, snapshot
+    import sublime
 except ImportError:
     from lib import core, authoring, install, tiger
     from lib.watcher import changes, snapshot
+else:
+    import importlib
+    core, authoring, install, tiger = [importlib.import_module('LSP-px.lib.' + name) for name in ('core', 'authoring', 'install', 'tiger')]
+    watcher = importlib.import_module('LSP-px.lib.watcher')
+    changes, snapshot = watcher.changes, watcher.snapshot
 
 
 class WorkspaceTest(unittest.TestCase):
