@@ -1,0 +1,8 @@
+LSP-px — CK3 modding for Sublime Text
+
+Install the separate LSP package with Package Control, then restart Sublime.
+Run Paradox: Setup, configure CK3, and open a mod folder with descriptor.mod.
+The pinned language server downloads on first use. Node 18+ is required on
+Linux/macOS; Windows x64 can use the bundled runtime if Node is absent.
+
+See Preferences > Package Settings > LSP-px > Setup for the complete guide.

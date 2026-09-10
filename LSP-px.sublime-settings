@@ -1,0 +1,61 @@
+{
+    // Requires the separate LSP package (2.13+). The managed server is pinned.
+    "enabled": true,
+    "selector": "source.paradox | source.paradox-loc | source.paradox-gui | source.paradox-mod | source.paradox-info",
+    "schemes": ["file"],
+    "command": [],
+    "settings": {
+        "gameId": "ck3",
+        // CK3's game/ directory, not the launcher executable directory.
+        "gamePath": null,
+        "logsPath": null,
+        // Null / [] detects descriptor.mod roots from the open folders.
+        "modPath": null,
+        "workspaceMods": [],
+        // Dependencies in load order, base first. These are read-only context.
+        "parentPaths": [],
+        "locLanguage": "english",
+        "completionMode": "minimal",
+        "hoverDetail": "standard",
+        "scopeInlayHints": false,
+        "indexAssets": true,
+        "calendar": null,
+        "diagnosticsIgnore": [],
+        "diagnosticsIgnorePatterns": [],
+        "diagnosticsVanilla": false,
+        "tracePerf": false
+    },
+    "px": {
+        // Advanced: exact argument array, e.g. ["node", "/path/dist/server.js", "--stdio"].
+        "server_command": [],
+        "node_path": null,
+        // Null follows upstream: half of RAM, bounded to 2048..4096 MiB.
+        "heap_mb": null,
+        "storage_dir": null,
+        "data_dir": null,
+        "detect_syntax": true,
+        "excluded_mods": [],
+        // Enables inlay hints for this window; use LSP's toggle to hide them.
+        "inlay_hints": true,
+        "watch_interval_seconds": 3,
+        "tiger_path": null,
+        "tiger_run_on": "manual",
+        "tiger_timeout_seconds": 180,
+        "require_descriptor": false
+    },
+    "markdown_language_map": {
+        "paradox": [["paradox"], ["LSP-px", "syntaxes/Paradox Script"]],
+        "paradox-gui": [["paradox-gui"], ["LSP-px", "syntaxes/Paradox GUI"]],
+        "paradox-loc": [["paradox-loc"], ["LSP-px", "syntaxes/Paradox Localization"]]
+    },
+    "semantic_tokens": {
+        "method": "support.function.effect.paradox",
+        "function": "support.function.trigger.paradox",
+        "variable": "variable.other.paradox",
+        "property": "support.constant.modifier.paradox",
+        "macro": "entity.name.function.paradox",
+        "event": "entity.name.event.paradox",
+        "enumMember": "constant.other.paradox",
+        "string": "string.other.localization.paradox"
+    }
+}

@@ -1,0 +1,108 @@
+{
+  "fields": [
+    {
+      "key": "name",
+      "required": true,
+      "repeatable": false,
+      "outerOnly": false,
+      "summary": "Display name in the launcher and on Steam Workshop",
+      "doc": "The name players see in the launcher's mod list and on the Workshop page. Needs at least 3 characters for a Workshop upload.\n\n```\nname=\"My Mod\"\n```",
+      "snippet": "name=\"${1:My Mod}\""
+    },
+    {
+      "key": "version",
+      "required": true,
+      "repeatable": false,
+      "outerOnly": false,
+      "summary": "Your mod's own version number (NOT the game version)",
+      "doc": "Free-form version string shown in the launcher. Bump it when you release an update so players can tell versions apart. This is about your mod, not the game - the game version goes in `supported_version`.\n\n```\nversion=\"0.1.0\"\n```",
+      "snippet": "version=\"${1:0.1.0}\""
+    },
+    {
+      "key": "supported_version",
+      "required": true,
+      "repeatable": false,
+      "outerOnly": false,
+      "summary": "Newest game version the mod works with",
+      "doc": "The launcher compares this against the installed game and marks the mod out of date when the game is newer. A `*` wildcard keeps the mod valid for every hotfix of a patch.\n\n```\nsupported_version=\"1.19.*\"\n```",
+      "snippet": "supported_version=\"${1:1.19.*}\""
+    },
+    {
+      "key": "tags",
+      "required": false,
+      "repeatable": false,
+      "outerOnly": false,
+      "summary": "Launcher / Workshop category tags (one quoted tag per line)",
+      "doc": "Categories players can filter by in the launcher and on the Workshop. Pick from the launcher's list (completion inside the block offers all of them); a Workshop upload needs at least one.\n\n```\ntags={\n\t\"Gameplay\"\n\t\"Events\"\n}\n```",
+      "snippet": "tags={\n\t\"${1:Gameplay}\"\n}"
+    },
+    {
+      "key": "path",
+      "required": false,
+      "repeatable": false,
+      "outerOnly": true,
+      "summary": "Where the mod folder is - outer <name>.mod file only",
+      "doc": "Tells the launcher where the mod's files live. Absolute or relative to the game's user directory, forward slashes only.\n\n**Leave this line out of `descriptor.mod`** - it is ignored there, and a copied absolute path breaks when the mod is shared.\n\n```\npath=\"mod/my_mod\"\n```",
+      "snippet": "path=\"${1:mod/my_mod}\""
+    },
+    {
+      "key": "remote_file_id",
+      "required": false,
+      "repeatable": false,
+      "outerOnly": false,
+      "summary": "Steam Workshop item ID (set automatically on first upload)",
+      "doc": "Links the local mod to its Workshop page so updates go to the same item. The launcher fills this in when you first upload - you only ever set it by hand to reconnect a mod to an existing Workshop item. Digits only.\n\n```\nremote_file_id=\"2962333032\"\n```",
+      "snippet": "remote_file_id=\"${1:123456789}\""
+    },
+    {
+      "key": "picture",
+      "required": false,
+      "repeatable": false,
+      "outerOnly": false,
+      "summary": "Launcher thumbnail image (file inside the mod folder)",
+      "doc": "Image shown next to the mod in the launcher. Steam Workshop ignores it and always uses `thumbnail.png` in the mod root instead (1:1, max 1 MB).\n\n```\npicture=\"thumbnail.png\"\n```",
+      "snippet": "picture=\"${1:thumbnail.png}\""
+    },
+    {
+      "key": "replace_path",
+      "required": false,
+      "repeatable": true,
+      "outerOnly": false,
+      "summary": "Unload an entire vanilla folder (repeat per folder)",
+      "doc": "The game skips every vanilla file under this folder, so only your mod's version of it exists. One line per folder, forward slashes, relative to the game root. Used by total conversions to drop vanilla history, titles, cultures etc. wholesale - do not use it for ordinary overrides.\n\n```\nreplace_path=\"history/characters\"\nreplace_path=\"common/landed_titles\"\n```",
+      "snippet": "replace_path=\"${1:history/characters}\""
+    },
+    {
+      "key": "dependencies",
+      "required": false,
+      "repeatable": false,
+      "outerOnly": false,
+      "summary": "Mods that must load BEFORE this one",
+      "doc": "The launcher sorts every listed mod above this one in the load order. Use the exact `name` of the other mod, one quoted name per line. Mostly for submods and compatibility patches.\n\n```\ndependencies={\n\t\"A Game of Thrones\"\n}\n```",
+      "snippet": "dependencies={\n\t\"${1:Name of the parent mod}\"\n}"
+    }
+  ],
+  "tags": [
+    "Alternative History",
+    "Balance",
+    "Bookmarks",
+    "Character Focuses",
+    "Character Interactions",
+    "Culture",
+    "Decisions",
+    "Events",
+    "Fixes",
+    "Gameplay",
+    "Graphics",
+    "Historical",
+    "Map",
+    "Portraits",
+    "Religion",
+    "Schemes",
+    "Sound",
+    "Total Conversion",
+    "Translation",
+    "Utilities",
+    "Warfare"
+  ]
+}

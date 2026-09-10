@@ -1,0 +1,15 @@
+{
+    "name": "Paradox",
+    "extends": "Mariana.sublime-color-scheme",
+    "rules": [
+        {"scope": "meta.semantic-token", "background": "var(background)"},
+        {"scope": "meta.semantic-token.method", "foreground": "#F0BA79"},
+        {"scope": "meta.semantic-token.function", "foreground": "#A6D189"},
+        {"scope": "meta.semantic-token.variable", "foreground": "#99D1DB"},
+        {"scope": "meta.semantic-token.property", "foreground": "#E5C890"},
+        {"scope": "meta.semantic-token.macro", "foreground": "#CA9EE6"},
+        {"scope": "meta.semantic-token.event", "foreground": "#E78284"},
+        {"scope": "meta.semantic-token.enummember", "foreground": "#85C1DC"},
+        {"scope": "meta.semantic-token.string", "foreground": "#A6D189"}
+    ]
+}

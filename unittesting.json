@@ -1,0 +1,5 @@
+{
+    "verbosity": 2,
+    "coverage": false,
+    "reload_package_on_testing": false
+}
