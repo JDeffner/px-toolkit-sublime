@@ -2,6 +2,8 @@
 
 CK3 modding in Sublime Text 4, powered by [Paradox Language Server](https://github.com/JDeffner/paradox-modding-toolkit) and the [Sublime LSP client](https://lsp.sublimetext.io/).
 
+[User documentation](https://github.com/JDeffner/px-toolkit-sublime/wiki) covers installation, projects, settings, authoring, and troubleshooting.
+
 This repository contains the native package. Event graphs, dynasty data and GUI layouts are presented as searchable lists and readable reports. An external graphical designer is outside this release.
 
 ## Install and set up
@@ -63,7 +65,7 @@ Open Preferences → Package Settings → LSP-px → Settings. Server settings l
 }
 ```
 
-Project values override global values; defaults fill omitted server fields. Relative server paths resolve against the first project folder. `descriptor.mod` identifies editable mod roots; set `modPath`/`workspaceMods` explicitly for an unconventional layout. `modPath` remains the stable default root while commands select the mod containing the active document. One game is supported per window. Parent folders and vanilla are read-only context for package writers, though Sublime itself still allows opening/editing files normally.
+Project values override global values; defaults fill omitted server fields. Relative server paths resolve against the first project folder. `descriptor.mod` identifies editable mod roots; set `modPath`/`workspaceMods` explicitly for an unconventional layout. `modPath` remains the stable default root while commands select the mod containing the active document. One game is supported per window. Parent folders, including playset parents and nested dependencies, and vanilla are read-only context for package writers, though Sublime itself still allows opening/editing files normally.
 
 | Server setting | Default / choices |
 | --- | --- |
@@ -84,7 +86,7 @@ Project values override global values; defaults fill omitted server fields. Rela
 | `diagnosticsVanilla` | `false`; diagnostics on opened vanilla files |
 | `tracePerf` | `false`; server timing logs |
 
-All sixteen are forwarded as a complete resolved object through the server's custom configuration notification. Path, language and asset changes rebuild the index. Completion/hover/diagnostic preferences update live. Mod-local `.px-toolkit/calendar.json` takes precedence over calendar settings. Playset/schema changes restart the server; the package owns a cancellable polling watcher for external mod/dependency creates, edits and deletes. Vanilla is not polled. Increase `px.watch_interval_seconds` for a large dependency tree.
+All sixteen are forwarded as a complete resolved object through the server's custom configuration notification. Path, language and asset changes rebuild the index. Completion/hover/diagnostic preferences update live. Mod-local `.px-toolkit/calendar.json` takes precedence over calendar settings. Playsets require a JSON object whose `parents` value is an array of nonempty path strings. Invalid playsets are rejected before replacing a running watcher or restarting the session. Playset/schema changes restart the server even when an HTML report has focus; the package owns a cancellable polling watcher for external mod/dependency creates, edits and deletes. Vanilla is not polled. Increase `px.watch_interval_seconds` for a large dependency tree; it must be a finite number of at least 1.
 
 | Adapter setting | Meaning |
 | --- | --- |
@@ -106,11 +108,11 @@ Semantic highlighting, completion presentation, signature help, diagnostics styl
 
 ## Writing and validation
 
-Localization and definition/GUI edits stay in buffers until you save. Existing dirty buffers take precedence over disk. Returned source edits are checked against the source snapshot, translated from UTF-16 offsets, applied as one undo operation, and refused when stale. Localization saves use UTF-8 with BOM, preserve existing versions/comments and reject malformed or duplicate keys within a target file. Parent/vanilla localization overrides go into the editable mod's `localization/replace/` folder. Matching sibling files are preferred for new keys.
+Localization and definition/GUI edits stay in buffers until you save. Existing dirty buffers take precedence over disk. Localization finds exact definitions in the requested language, including replace files and unsaved new buffers, before selecting a new override destination. Multiple editable sites use a destination picker. Returned source edits are checked against the source snapshot, translated from UTF-16 offsets, applied as one undo operation, and refused when stale. Localization saves use UTF-8 with BOM, preserve existing versions/comments and reject malformed or duplicate keys within a target file. Parent/vanilla localization overrides go into the editable mod's `localization/replace/` folder. Matching sibling files are preferred for new keys.
 
 To author another language, invoke `px_localization` with `language` or `choose_language: true`, or change `settings.locLanguage`. This edits localization text; it does not provide machine translation. Templates are schema/example-derived starting points: fill their placeholders and validate with Tiger.
 
-Tiger validates **saved files**. Unsaved files prevent a run. Results use their own output panel and underlines, are cancelled/superseded coherently, and preserve results for other editable mods. The adapter accepts `.px-toolkit/ck3-tiger.conf` or an existing root `ck3-tiger.conf`; otherwise it supplies configured parent descriptors. LSP and Tiger support code/glob suppression and `# px:ignore CODE` / `# px:ignore-next-line CODE` annotations. Neither validator guarantees in-game behavior.
+Tiger validates **saved files**. Unsaved files prevent a new run. A rejected replacement leaves the current run active; a valid replacement cancels it. Results use their own output panel and underlines, are cancelled/superseded coherently, and preserve results for other editable mods. The adapter accepts `.px-toolkit/ck3-tiger.conf` or an existing root `ck3-tiger.conf`; otherwise it supplies configured parent descriptors. LSP and Tiger support code/glob suppression and `# px:ignore CODE` / `# px:ignore-next-line CODE` annotations. Neither validator guarantees in-game behavior.
 
 ## Limits
 

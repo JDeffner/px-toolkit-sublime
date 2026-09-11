@@ -183,6 +183,46 @@ def tiger_fixed(path):
 
 
 def finish():
+    # Report focus must not hide either automatic or manual server restart.
+    parent = fixture.parent / ('restart_parent_' + run_id)
+    (parent / 'common/traits').mkdir(parents=True)
+    (parent / 'descriptor.mod').write_text('name="Restart parent"\n', encoding='utf-8-sig')
+    symbol = 'px_restart_parent_' + run_id
+    (parent / 'common/traits/test.txt').write_text(symbol + ' = { prowess = 2 }\n', encoding='utf-8-sig')
+    playset = fixture / '.px-toolkit/playset.json'
+    playset.parent.mkdir(exist_ok=True)
+    old_playset = playset.read_bytes() if playset.exists() else None
+    old = module.instance(window)
+    sheet = module.ui.report(window, 'Restart regression', {'status': 'Waiting for parent index'})
+    window.focus_sheet(sheet)
+    check('report focus has no text view', window.active_view() is None)
+    playset.write_text(json.dumps({'parents': [str(parent)]}), encoding='utf-8')
+    def restarted():
+        check('playset restarts while report focused', module.instance(window) is not old)
+        def symbols_ready():
+            session = module.instance(window).weaksession()
+            session.send_request_async(module.Request('workspace/symbol', {'query': symbol}),
+                lambda rows: module.ui.on_main(lambda: verify_parent(rows)))
+        wait_for(lambda: module.instance(window).health.get('definitions', 0) > 0 and
+                 not module.instance(window).health.get('indexing', True), symbols_ready)
+    def verify_parent(rows):
+        check('restarted server indexes added parent', any(row['name'] == symbol for row in rows), rows)
+        current = module.instance(window)
+        window.focus_sheet(sheet)
+        window.run_command('px_restart')
+        def manual_done():
+            check('manual restart while report focused', module.instance(window) is not current)
+            sheet.close()
+            if old_playset is None:
+                playset.unlink()
+            else:
+                playset.write_bytes(old_playset)
+            complete()
+        wait_for(lambda: module.instance(window) and module.instance(window) is not current, manual_done)
+    wait_for(lambda: module.instance(window) and module.instance(window) is not old, restarted)
+
+
+def complete():
     results['complete'] = True
     record('editor', results)
 

@@ -53,3 +53,9 @@ For local Windows editor integration:
 5. Create portable `Data/editor-config.json` with absolute `node`, `server`, `game`, and optional `tiger` paths. Copy `scripts/editor_integration.py` to portable `Data/integration.py`; run portable `subl.exe --command px_test_run`. Inspect `Data/editor.json` for `complete: true` and no failures.
 
 The test harness and scripts are excluded from the public `.sublime-package`. Do not install the harness into a normal profile. CI uses the separate UnitTesting tests in `tests/test_editor.py` and requires no CK3 game assets.
+
+## Audit fixes, 11 September 2026
+
+The local audit-fix suite has 33 pure tests and 13 native editor tests. All 46 passed inside Sublime Text 4200; standalone Python skips the 13 native tests. Regression coverage includes nested/playset dependency edit guards, malformed playsets retaining the current watcher and session, alternate-language and unsaved localization destinations, rejected Tiger replacements, and restart dispatch from HTML reports.
+
+The broader local workflow passed 26 checks with the real server and CK3/Tiger installation. The added checks verify a playset-triggered restart while a report has focus, indexing of a new parent definition, and manual restart from a report. These results were recorded locally. Remote checks for this revision are listed on the pull request; earlier successful runs do not validate later changes.

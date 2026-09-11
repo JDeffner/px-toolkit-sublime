@@ -107,6 +107,9 @@ def resolve_settings(raw, folders=(), active_file=None, excluded=()):
                          and not under(p, result["gamePath"])
                          and not any(under(p, x) for x in result["parentPaths"]))
     result["workspaceMods"] = roots
+    parents = dependency_roots(result)
+    roots = [p for p in roots if not any(under(p, parent) for parent in parents)]
+    result["workspaceMods"] = roots
     result["modPath"] = roots[0] if roots else None
     return result
 
@@ -114,7 +117,7 @@ def resolve_settings(raw, folders=(), active_file=None, excluded=()):
 def language_for(file, settings):
     if not file:
         return None
-    roots = settings["workspaceMods"] + settings["parentPaths"] + [settings["gamePath"]]
+    roots = settings["workspaceMods"] + dependency_roots(settings) + [settings["gamePath"]]
     root = max((r for r in roots if under(file, r)), key=len, default=None)
     if not root:
         return None
@@ -134,6 +137,8 @@ def language_for(file, settings):
 
 
 def editable_root(file, settings):
+    if under(file, settings["gamePath"]) or any(under(file, p) for p in dependency_roots(settings)):
+        return None
     return max((r for r in settings["workspaceMods"] if under(file, r)), key=len, default=None)
 
 
@@ -210,9 +215,24 @@ def read_json(path, default=None):
 
 
 def parents_for(settings, root):
-    playset = read_json(os.path.join(root, ".px-toolkit", "playset.json"), {})
-    paths = playset.get("parents", []) if isinstance(playset, dict) else []
-    return unique_paths(settings["parentPaths"] + [expand_path(p, root) for p in paths if isinstance(p, str)])
+    file = Path(root) / ".px-toolkit/playset.json"
+    try:
+        playset = json.loads(file.read_text(encoding="utf-8-sig"))
+    except FileNotFoundError:
+        playset = {}
+    except (OSError, ValueError) as exc:
+        raise ValueError("Cannot read playset {}: {}".format(file, exc)) from exc
+    if not isinstance(playset, dict):
+        raise ValueError("Playset must be a JSON object: " + str(file))
+    paths = playset.get("parents", [])
+    if not isinstance(paths, list) or not all(isinstance(p, str) and p.strip() for p in paths):
+        raise ValueError("Playset parents must be a list of nonempty path strings: " + str(file))
+    return unique_paths(settings["parentPaths"] + [expand_path(p, root) for p in paths])
+
+
+def dependency_roots(settings):
+    return unique_paths(settings["parentPaths"] + [
+        parent for root in settings["workspaceMods"] for parent in parents_for(settings, root)])
 
 
 def detect_game():

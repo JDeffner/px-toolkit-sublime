@@ -6,7 +6,7 @@ import os
 import re
 from pathlib import Path
 
-from .core import under
+from .core import under, unique_paths
 
 KEY = re.compile(r"^[A-Za-z0-9_.-]+$")
 LOC_ENTRY = re.compile(r'^(\s*)([A-Za-z0-9_.-]+)(\s*:\s*\d*\s*)"((?:\\.|[^"\\])*)"(.*)$')
@@ -55,36 +55,34 @@ def upsert_localization(text, key, value, language):
     return text + " " + key + ":0 " + quote(value) + eol
 
 
-def localization_target(root, language, key, entries, read_text=None):
-    """Prefer a mod definition, then siblings, otherwise a new ordinary file.
-
-    The caller presents choices when the index contains multiple editable sites.
-    A key inherited from vanilla/parents is intentionally placed in replace/.
-    """
-    candidates = [e["file"] for e in entries if e.get("source") == "mod" and under(e["file"], root)
-                  and e["file"].endswith("_l_" + language + ".yml")]
-    if candidates:
-        return candidates[0]
+def localization_targets(root, language, key, entries, read_text=None, open_files=(), is_editable=None):
+    """Find exact sites in the requested language before choosing a new file."""
+    if not isinstance(language, str) or not re.fullmatch(r"[a-z_]+", language):
+        raise ValueError("Invalid language")
     loc = Path(root) / "localization"
-    if any(not under(e.get("file"), root) for e in entries):
-        return str(loc / "replace" / ("000_px_sublime_overrides_l_" + language + ".yml"))
+    files = unique_paths([e["file"] for e in entries] + list(open_files) +
+                         [str(p) for p in sorted(loc.rglob("*_l_" + language + ".yml"))])
     prefix = re.split(r"[._]", key)[0]
-    best = None
-    score = 0
-    if prefix and loc.is_dir():
-        for file in sorted(loc.rglob("*_l_" + language + ".yml")):
-            if "replace" in file.relative_to(loc).parts or not under(str(file), root):
-                continue
-            try:
-                text = read_text(str(file)) if read_text else file.read_text(encoding="utf-8-sig")
-            except (OSError, UnicodeError):
-                continue
-            if re.search(r"^\s*" + re.escape(key) + r"\s*:", text, re.M):
-                return str(file)
+    exact, best, score = [], None, 0
+    for file in files:
+        if (not under(file, loc) or not file.endswith("_l_" + language + ".yml")
+                or (is_editable and not is_editable(file))):
+            continue
+        try:
+            text = read_text(file) if read_text else Path(file).read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeError):
+            continue
+        if re.search(r"^\s*" + re.escape(key) + r"\s*:", text, re.M):
+            exact.append(file)
+        if "replace" not in Path(os.path.relpath(file, loc)).parts:
             count = len(re.findall(r"^\s*" + re.escape(prefix) + r"[._][\w.-]*\s*:", text, re.M))
             if count > score:
-                score, best = count, str(file)
-    return best or str(loc / language / ("px_sublime_l_" + language + ".yml"))
+                score, best = count, file
+    if exact:
+        return exact
+    if any(not under(e.get("file"), root) or (is_editable and not is_editable(e["file"])) for e in entries):
+        return [str(loc / "replace" / ("000_px_sublime_overrides_l_" + language + ".yml"))]
+    return [best or str(loc / language / ("px_sublime_l_" + language + ".yml"))]
 
 
 def descriptor_entries(text):

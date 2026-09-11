@@ -49,11 +49,11 @@ def configuration(window):
     return settings
 
 
-def resolved(window, view=None):
+def resolved(window, view=None, file=None):
     conf = configuration(window)
     options = conf.get("px", {})
     view = view or window.active_view()
-    return core.resolve_settings(conf.get("settings", {}), window.folders(), view.file_name() if view else None,
+    return core.resolve_settings(conf.get("settings", {}), window.folders(), file or (view.file_name() if view else None),
                                  options.get("excluded_mods", []))
 
 
@@ -104,12 +104,16 @@ def active_root(window, view=None):
 
 
 def require_editable(view):
-    if not view or not core.editable_root(view.file_name(), resolved(view.window(), view)):
+    require_editable_path(view.window() if view else None, view.file_name() if view else None)
+
+
+def require_editable_path(window, file):
+    if not window or not core.editable_root(file, resolved(window, file=file)):
         raise ValueError("Choose a file inside an editable workspace mod; dependencies and vanilla are read-only context")
 
 
 def restart(window):
-    view = window.active_view()
+    view = window.active_view() or next(iter(window.views()), None)
     if view:
         view.run_command("lsp_restart_server", {"config_name": NAME})
 
@@ -213,18 +217,22 @@ if HAS_LSP:
                 return
             try:
                 new_settings = resolved(session.window)
+                roots = core.unique_paths(new_settings["workspaceMods"] + core.dependency_roots(new_settings))
+                interval = configuration(session.window).get("px", {}).get("watch_interval_seconds", 3)
+                if not isinstance(interval, (int, float)) or isinstance(interval, bool) or not 1 <= interval < float("inf"):
+                    raise ValueError("watch_interval_seconds must be a finite number of at least 1")
             except ValueError as exc:
                 ui.error(exc)
                 return
-            if new_settings == self.settings:
+            if (new_settings == self.settings and self.watcher and self.watcher.roots == roots
+                    and self.watcher.interval == interval):
                 return
+            watcher = ModWatcher(roots, self.files_changed, interval)
             self.settings = new_settings
             session.send_notification(Notification("paradox/configChanged", self.settings))
             if self.watcher:
                 self.watcher.stop()
-            roots = core.unique_paths(self.settings["workspaceMods"] + [p for root in self.settings["workspaceMods"] for p in core.parents_for(self.settings, root)])
-            interval = configuration(session.window).get("px", {}).get("watch_interval_seconds", 3)
-            self.watcher = ModWatcher(roots, self.files_changed, interval)
+            self.watcher = watcher
             self.watcher.start()
             ui.on_main(lambda: session.window.run_command("lsp_toggle_inlay_hints", {"enable": bool(session.window.settings().get("lsp_show_inlay_hints", True))}))
 
@@ -240,6 +248,11 @@ if HAS_LSP:
             if not session or UNLOADING:
                 return
             if any(os.path.basename(p) in ("schema.json", "playset.json") for p in paths):
+                try:
+                    resolved(session.window)
+                except ValueError as exc:
+                    ui.error(exc)
+                    return
                 ui.on_main(lambda: restart(session.window))
             else:
                 for file in paths:
@@ -603,22 +616,30 @@ class PxLocalizationCommand(sublime_plugin.WindowCommand):
                 def read(file):
                     opened = self.window.find_open_file(file)
                     return opened.substr(sublime.Region(0, opened.size())) if opened else Path(file).read_text(encoding="utf-8-sig")
-                candidates = core.unique_paths(e["file"] for e in entries if core.under(e["file"], root) and e["file"].endswith("_l_" + lang + ".yml"))
-                if target is None and edit_value and len(candidates) > 1:
-                    ui.pick(self.window, "Choose the localization definition to edit",
-                        [{"label": os.path.basename(file), "detail": file, "file": file} for file in candidates],
-                        lambda item: self.run(key, side, edit_value, value, lang, item["file"]))
-                    return
-                destination = target or authoring.localization_target(root, lang, key, entries, read)
-                authoring.validate_loc_target(destination, root, lang)
-                target_before = read(destination) if os.path.isfile(destination) or self.window.find_open_file(destination) else ""
                 if not edit_value and entries:
                     ui.pick(self.window, "Localization: " + key,
                             [dict(e, label=e.get("value", key), detail=e["file"]) for e in entries],
                             lambda e: ui.open_source(self.window, e["file"], e["line"], side=side))
                     return
+                candidates = authoring.localization_targets(root, lang, key, entries, read,
+                    [v.file_name() for v in self.window.views() if v.file_name()],
+                    lambda file: core.editable_root(file, settings))
+                if target is None and edit_value and len(candidates) > 1:
+                    ui.pick(self.window, "Choose the localization definition to edit",
+                        [{"label": os.path.basename(file), "detail": file, "file": file} for file in candidates],
+                        lambda item: self.run(key, side, edit_value, value, lang, item["file"]))
+                    return
+                destination = target or candidates[0]
+                authoring.validate_loc_target(destination, root, lang)
+                require_editable_path(self.window, destination)
+                target_before = read(destination) if os.path.isfile(destination) or self.window.find_open_file(destination) else ""
                 def apply(text):
                     # Opening a missing path creates a dirty buffer; save stays explicit.
+                    try:
+                        require_editable_path(self.window, destination)
+                    except ValueError as exc:
+                        ui.error(exc)
+                        return
                     Path(destination).parent.mkdir(parents=True, exist_ok=True)
                     if side:
                         if self.window.num_groups() < 2:
@@ -628,6 +649,7 @@ class PxLocalizationCommand(sublime_plugin.WindowCommand):
                         opened = self.window.open_file(destination)
                     def write(buffer):
                         try:
+                            require_editable(buffer)
                             old = buffer.substr(sublime.Region(0, buffer.size()))
                             if old != target_before:
                                 raise ValueError("Localization changed while the editor was open. Retry against the latest text.")
@@ -810,12 +832,18 @@ class PxDefinitionCommand(sublime_plugin.WindowCommand):
                 target = os.path.join(root, data["folder"], "px_" + name + ".txt")
                 if not core.under(target, root):
                     raise ValueError("The definition folder escapes the mod")
+                require_editable_path(self.window, target)
                 if os.path.exists(target) or self.window.find_open_file(target):
                     ui.error("The target already exists. Open it and use Edit Definition Property: " + target)
                     return
                 Path(target).parent.mkdir(parents=True, exist_ok=True)
                 created = self.window.open_file(target)
                 def start(buffer):
+                    try:
+                        require_editable(buffer)
+                    except ValueError as exc:
+                        ui.error(exc)
+                        return
                     assign_language(buffer)
                     buffer.set_encoding("UTF-8 with BOM")
                     if kind == "event":
@@ -826,6 +854,7 @@ class PxDefinitionCommand(sublime_plugin.WindowCommand):
                     doc = document(buffer)
                     # Use the server's measured skeleton, not a handwritten game template.
                     def snippet_result(result):
+                        require_editable(buffer)
                         if buffer.substr(sublime.Region(0, buffer.size())) != doc["text"]:
                             ui.error("The new definition changed while its template loaded. Reopen the snippet picker.")
                             return
@@ -895,6 +924,11 @@ class PxConfigFileCommand(sublime_plugin.WindowCommand):
             ui.error("Open an editable mod first")
             return
         file = os.path.join(root, ".px-toolkit", kind + ".json")
+        try:
+            require_editable_path(self.window, file)
+        except ValueError as exc:
+            ui.error(exc)
+            return
         Path(file).parent.mkdir(parents=True, exist_ok=True)
         existed = os.path.exists(file) or self.window.find_open_file(file)
         view = self.window.open_file(file)
@@ -946,9 +980,9 @@ class PxTigerCommand(sublime_plugin.WindowCommand):
     def run(self, cancel=False, manual=True):
         window_id = self.window.id()
         previous = TIGER_RUNS.get(window_id)
-        if previous:
-            previous.cancel()
         if cancel:
+            if previous:
+                previous.cancel()
             TIGER_RUNS.pop(window_id, None)
             for view in self.window.views():
                 view.erase_status("px_tiger")
@@ -964,6 +998,8 @@ class PxTigerCommand(sublime_plugin.WindowCommand):
                     ui.error("Save the mod's changed files before running Tiger. It validates files on disk.")
                 return
             run = tiger.TigerRun()
+            if previous:
+                previous.cancel()
             TIGER_RUNS[window_id] = run
             ui.message("Tiger validating " + os.path.basename(root) + "…")
             for v in self.window.views():
@@ -1004,10 +1040,14 @@ class PxTigerCommand(sublime_plugin.WindowCommand):
                             self.window.run_command("show_panel", {"panel": "output.px_tiger"})
                     ui.on_main(publish)
                 except (ValueError, OSError) as exc:
-                    if TIGER_RUNS.get(window_id) is run:
+                    def failed(message=str(exc)):
+                        if TIGER_RUNS.get(window_id) is not run or UNLOADING:
+                            return
                         TIGER_RUNS.pop(window_id, None)
-                        ui.error(exc)
-                        ui.on_main(lambda: [v.set_status("px_tiger", "Tiger: failed; see error") for v in self.window.views()])
+                        ui.error(message)
+                        for view in self.window.views():
+                            view.set_status("px_tiger", "Tiger: failed; see error")
+                    ui.on_main(failed)
             threading.Thread(target=worker, name="LSP-px Tiger", daemon=True).start()
         except ValueError as exc:
             if manual:
@@ -1019,8 +1059,13 @@ def validate_descriptor(view):
         return
     text = view.substr(sublime.Region(0, view.size()))
     issues = authoring.descriptor_issues(text, DESCRIPTOR_DATA["fields"], os.path.basename(view.file_name() or "") == "descriptor.mod")
-    settings = resolved(view.window(), view)
-    root = core.editable_root(view.file_name(), settings)
+    try:
+        settings = resolved(view.window(), view)
+        root = core.editable_root(view.file_name(), settings)
+    except ValueError as exc:
+        view.set_status("px_config", str(exc))
+        view.erase_regions("px_descriptor")
+        return
     if not root:
         issues = []
     else:
@@ -1058,6 +1103,7 @@ class PxCreateDescriptorCommand(sublime_plugin.WindowCommand):
         else:
             try:
                 content = authoring.scaffold_descriptor(name, version)
+                require_editable_path(self.window, target)
                 view = self.window.open_file(target)
                 ui.when_loaded(view, lambda v: v.run_command("px_set_text", {"expected": "", "text": content}))
             except ValueError as exc:
@@ -1098,7 +1144,13 @@ class PxEvents(sublime_plugin.EventListener):
         assign_language(view)
         validate_descriptor(view)
         window = view.window()
-        if not window or not core.editable_root(view.file_name(), resolved(window, view)):
+        if not window:
+            return
+        try:
+            if not core.editable_root(view.file_name(), resolved(window, view)):
+                return
+        except ValueError as exc:
+            view.set_status("px_config", str(exc))
             return
         obj = instance(window)
         if obj:

@@ -63,6 +63,38 @@ class WorkspaceTest(unittest.TestCase):
         a = core.resolve_settings(raw, [str(self.root)], str(self.other / "events/a.txt"))
         self.assertEqual(a["modPath"], str(self.root))
 
+    def test_nested_dependency_and_game_are_not_editable(self):
+        parent = self.root / "dependencies/base"
+        parent.mkdir(parents=True)
+        for option in ("parentPaths", "gamePath"):
+            value = [str(parent)] if option == "parentPaths" else str(parent)
+            settings = self.settings(**{option: value})
+            self.assertIsNone(core.editable_root(str(parent / "events/a.txt"), settings))
+            self.assertEqual(core.editable_root(str(self.root / "events/a.txt"), settings), str(self.root))
+
+    def test_playset_parent_folder_is_context_only(self):
+        folder = self.root / ".px-toolkit"
+        folder.mkdir()
+        (folder / "playset.json").write_text(json.dumps({"parents": [str(self.other)]}))
+        settings = core.resolve_settings({}, [str(self.root), str(self.other)])
+        self.assertEqual(settings["workspaceMods"], [str(self.root)])
+        self.assertIsNone(core.editable_root(str(self.other / "events/a.txt"), settings))
+        self.assertEqual(core.language_for(str(self.other / "events/a.txt"), settings), "script")
+        self.assertEqual(set(settings), set(core.SETTINGS))
+
+    def test_playset_rejects_malformed_values(self):
+        folder = self.root / ".px-toolkit"
+        folder.mkdir()
+        file = folder / "playset.json"
+        for value in (None, 42, "../parent", ["valid", 42], [""], ["  "]):
+            file.write_text(json.dumps({"parents": value}))
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, "Playset parents"):
+                self.settings()
+        for text in ("{", "null", "[]"):
+            file.write_text(text)
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                self.settings()
+
     def test_excluded_root_and_vanilla_are_not_editable(self):
         result = core.resolve_settings({"gamePath": str(self.other)}, [str(self.root), str(self.other)], excluded=[str(self.root)])
         self.assertEqual(result["workspaceMods"], [])
@@ -109,17 +141,42 @@ class WorkspaceTest(unittest.TestCase):
         loc.mkdir(parents=True)
         sibling = loc / "events_l_english.yml"
         sibling.write_text('l_english:\n px_event_title:0 "Title"\n', encoding="utf-8-sig")
-        target = authoring.localization_target(str(self.root), "english", "px_event_desc", [])
-        self.assertEqual(target, str(sibling))
-        inherited = authoring.localization_target(str(self.root), "english", "vanilla_key", [{"file": "vanilla", "source": "vanilla"}])
-        self.assertIn("replace", Path(inherited).parts)
-        self.assertNotIn("replace", Path(authoring.localization_target(str(self.root), "english", "new_key", [])).parts)
+        target = authoring.localization_targets(str(self.root), "english", "px_event_desc", [])
+        self.assertEqual(target, [str(sibling)])
+        inherited = authoring.localization_targets(str(self.root), "english", "vanilla_key", [{"file": "vanilla", "source": "vanilla"}])
+        self.assertIn("replace", Path(inherited[0]).parts)
+        self.assertNotIn("replace", Path(authoring.localization_targets(str(self.root), "english", "new_key", [])[0]).parts)
 
     def test_localization_cannot_escape_mod(self):
         with self.assertRaises(ValueError):
             authoring.validate_loc_target(str(self.other / "x_l_english.yml"), str(self.root), "english")
         with self.assertRaises(ValueError):
             authoring.validate_loc_target(str(self.root / "localization/x_l_french.yml"), str(self.root), "english")
+
+    def test_translation_exact_sites_precede_inherited_override(self):
+        ordinary = self.root / "localization/french/custom_l_french.yml"
+        override = self.root / "localization/replace/custom_l_french.yml"
+        unsaved = self.root / "localization/french/unsaved_l_french.yml"
+        for file in (ordinary, override):
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_text('l_french:\n shared_key:0 "Old"\n', encoding="utf-8-sig")
+        entries = [{"source": "vanilla", "file": str(self.other / "base_l_english.yml")}]
+        read = lambda file: ('l_french:\n shared_key:0 "Unsaved"\n' if file == str(unsaved)
+                             else Path(file).read_text(encoding="utf-8-sig"))
+        targets = authoring.localization_targets(str(self.root), "french", "shared_key", entries,
+                                                read, [str(unsaved)])
+        self.assertEqual(set(targets), {str(ordinary), str(override), str(unsaved)})
+        self.assertFalse(unsaved.exists())
+
+    def test_localization_does_not_select_read_only_nested_file(self):
+        parent = self.root / "localization/french/dependency"
+        parent.mkdir(parents=True)
+        file = parent / "base_l_french.yml"
+        file.write_text('l_french:\n shared_key:0 "Parent"\n')
+        settings = self.settings(parentPaths=[str(parent)])
+        targets = authoring.localization_targets(str(self.root), "french", "shared_key",
+            [{"file": str(file), "source": "mod"}], is_editable=lambda p: core.editable_root(p, settings))
+        self.assertEqual(targets, [str(self.root / "localization/replace/000_px_sublime_overrides_l_french.yml")])
 
     def test_new_mod_refuses_overwrite(self):
         root = authoring.new_mod(self.tmp.name, "new_mod", "My Mod", "1.19.*")
