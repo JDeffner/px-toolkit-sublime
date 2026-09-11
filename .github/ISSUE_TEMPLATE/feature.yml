@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest a Sublime modding workflow or improvement
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What are you trying to do?
+      description: Describe the modding task, current steps, and what gets in the way.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain what the editor should do and how you would use it. Include alternatives you have tried.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Examples and context
+      description: Mention related server features or upstream issues. Share only small examples you have permission to publish.

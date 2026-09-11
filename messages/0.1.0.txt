@@ -1,0 +1,5 @@
+0.1.0 — Initial native CK3 package
+
+Standard LSP editing, all sixteen server settings, native index/documentation
+tools, localization writing, GUI source editing, definition authoring, and Tiger.
+The guide lists current provider and platform limitations.

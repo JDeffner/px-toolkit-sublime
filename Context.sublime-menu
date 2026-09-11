@@ -1,0 +1,51 @@
+[
+    {
+        "caption": "Paradox",
+        "children": [
+            {
+                "caption": "Insert Snippet",
+                "command": "px_snippets",
+                "args": {}
+            },
+            {
+                "caption": "Browse All Generated Snippets",
+                "command": "px_snippets",
+                "args": {
+                    "catalogue": true
+                }
+            },
+            {
+                "caption": "Export Generated Snippets",
+                "command": "px_snippets",
+                "args": {
+                    "export": true
+                }
+            },
+            {
+                "caption": "Inspect Scope at Cursor",
+                "command": "px_report",
+                "args": {
+                    "feature": "scopeAt"
+                }
+            },
+            {
+                "caption": "Edit / Create Localization",
+                "command": "px_localization",
+                "args": {}
+            },
+            {
+                "caption": "Open Localization Side by Side",
+                "command": "px_localization",
+                "args": {
+                    "side": true,
+                    "edit_value": false
+                }
+            },
+            {
+                "caption": "Run Tiger Validation",
+                "command": "px_tiger",
+                "args": {}
+            }
+        ]
+    }
+]
