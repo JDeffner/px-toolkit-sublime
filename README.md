@@ -6,6 +6,10 @@ CK3 modding in Sublime Text 4, powered by [Paradox Language Server](https://gith
 
 This repository contains the native package. Event graphs, dynasty data and GUI layouts are presented as searchable lists and readable reports. An external graphical designer is outside this release.
 
+## Maintenance and project takeover
+
+I don't use Sublime Text regularly, so anyone interested is welcome to take over this project's maintenance. I'll still try to fix issues when I have time, but the [main Paradox Modding Toolkit](https://github.com/JDeffner/paradox-modding-toolkit) will always be my priority. If you'd like to take over, please [open an issue](https://github.com/JDeffner/px-toolkit-sublime/issues) so we can arrange the handover.
+
 ## Install and set up
 
 1. Install **LSP** through Package Control. Use LSP **2.13 or newer** and Sublime Text **build 4200 or newer**. Restart Sublime if LSP was installed after this package.
