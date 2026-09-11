@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.1.0 — release candidate
+## Unreleased
+
+- Clarify the GPL-3.0-or-later license grant, add contribution/security/support/conduct policies and GitHub templates, and document maintainer handover.
+- Protect nested and playset dependencies, validate playsets before watcher changes, preserve alternate-language localization targets, and fix Tiger replacement and report-focused restart behavior.
+
+## 0.1.0 release candidate
 
 - Native Sublime LSP helper pinned to px-lsp 0.3.4 (toolkit v0.4.3).
 - Scoped CK3 syntax support and all sixteen server settings.

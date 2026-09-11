@@ -1,0 +1,18 @@
+name: Question or maintainer handover
+description: Ask about setup, usage, contributions, or taking over maintenance
+body:
+  - type: markdown
+    attributes:
+      value: "Read the wiki and existing issues first. Maintainer replies depend on available time. For vulnerabilities, use the private security reporting link instead."
+  - type: textarea
+    id: question
+    attributes:
+      label: Question or proposal
+      description: Include what you tried. For a maintenance handover, describe your interest and which parts you would like to maintain.
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Relevant setup
+      description: For usage questions, include OS, package revision, Sublime/LSP versions, and relevant settings. Remove sensitive paths and data.

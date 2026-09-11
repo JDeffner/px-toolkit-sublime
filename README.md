@@ -4,6 +4,8 @@ CK3 modding in Sublime Text 4, powered by [Paradox Language Server](https://gith
 
 [User documentation](https://github.com/JDeffner/px-toolkit-sublime/wiki) covers installation, projects, settings, authoring, and troubleshooting.
 
+[Contributing](CONTRIBUTING.md) · [Support](SUPPORT.md) · [Security reporting](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md)
+
 This repository contains the native package. Event graphs, dynasty data and GUI layouts are presented as searchable lists and readable reports. An external graphical designer is outside this release.
 
 ## Maintenance and project takeover
@@ -133,4 +135,4 @@ Use **Paradox: Index Health**, **LSP: Troubleshoot Server**, **LSP: Toggle Log P
 
 Build: `python scripts/build_package.py`. Pure tests: `python -m unittest discover -s tests -v`. Real wire tests: `python scripts/ci_protocol.py`. Native CI uses [SublimeText/UnitTesting](https://github.com/SublimeText/UnitTesting). See [development and validation](docs/VALIDATION.md), [release checklist](docs/RELEASING.md), and [source notices](THIRD-PARTY-NOTICES.md).
 
-GPL-3.0; see [LICENSE](LICENSE). Game data is read from the user's installation, not distributed in this package. This project is not affiliated with Paradox Interactive.
+Licensed under **GPL-3.0-or-later**, matching the main Paradox Modding Toolkit. See [COPYRIGHT](COPYRIGHT) for the license grant, [LICENSE](LICENSE) for the full text, and [third-party notices](THIRD-PARTY-NOTICES.md) for attribution and separately installed components. Game data is read from the user's installation, not distributed in this package. This project is not affiliated with Paradox Interactive.
