@@ -53,7 +53,8 @@ class ManagedUpdateTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.storage = Path(self.tmp.name)
+        # Normalize macOS /var aliases and Windows short temporary paths.
+        self.storage = Path(self.tmp.name).resolve()
         self.options = {'heap_mb': 1024}
         self.node = patch.object(install, 'node_path', return_value='/node')
         self.node.start()
