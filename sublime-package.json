@@ -152,6 +152,20 @@
                     "type": "string"
                   }
                 },
+                "auto_update_server": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Check for a newer stable server on startup/restart. Disable to keep the cached version."
+                },
+                "server_version": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                  "description": "Pin an exact supported LSP version. Null follows auto_update_server."
+                },
                 "heap_mb": {
                   "type": [
                     "integer",

@@ -1,5 +1,5 @@
 {
-    // Requires the separate LSP package (2.13+). The managed server is pinned.
+    // Requires the separate LSP package (2.13+).
     "enabled": true,
     "selector": "source.paradox | source.paradox-loc | source.paradox-gui | source.paradox-mod | source.paradox-info",
     "schemes": ["file"],
@@ -28,6 +28,10 @@
     "px": {
         // Advanced: exact argument array, e.g. ["node", "/path/dist/server.js", "--stdio"].
         "server_command": [],
+        // Check for the latest stable server on startup/restart. False keeps the cached version.
+        "auto_update_server": true,
+        // Null follows automatic updates. Set an exact supported version (e.g. "0.3.4") to pin it.
+        "server_version": null,
         "node_path": null,
         // Null follows upstream: half of RAM, bounded to 2048..4096 MiB.
         "heap_mb": null,

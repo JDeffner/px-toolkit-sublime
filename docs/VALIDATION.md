@@ -59,3 +59,20 @@ The test harness and scripts are excluded from the public `.sublime-package`. Do
 The local audit-fix suite has 33 pure tests and 13 native editor tests. All 46 passed inside Sublime Text 4200; standalone Python skips the 13 native tests. Regression coverage includes nested/playset dependency edit guards, malformed playsets retaining the current watcher and session, alternate-language and unsaved localization destinations, rejected Tiger replacements, and restart dispatch from HTML reports.
 
 The broader local workflow passed 26 checks with the real server and CK3/Tiger installation. The added checks verify a playset-triggered restart while a report has focus, indexing of a new parent definition, and manual restart from a report. These results were recorded locally. Remote checks for this revision are listed on the pull request; earlier successful runs do not validate later changes.
+
+## Automatic server updates, 20 September 2026
+
+- Added 17 updater tests covering first install, upgrades, numeric version ordering, offline/rate-limited startup, metadata validation, checksum and archive failures, interrupted downloads, opt-out, manual commands, cache validation and Windows bundled-runtime updates.
+- All 63 tests passed inside Sublime Text 4200 with Python 3.8.12, including the 13 native editor tests. Standalone Python passed the 50 non-editor tests and skipped those 13 native tests.
+- The real protocol smoke passed against both bootstrap px-lsp 0.3.4 and the discovered stable px-lsp 0.3.5 from toolkit v0.4.4. `python scripts/ci_protocol.py --latest` exercises the updater and checks the selected server's reported version; CI now runs this alongside the bootstrap check.
+- The packed package started a managed 0.3.5 session in the isolated Sublime Text 4200 profile, without a manual server command. It retained the 0.3.4 installation and completed indexing 476,077 definitions from the installed CK3 game and local fixtures.
+- Live update verification was performed on Windows x64. The automated Windows bundled-runtime cases use synthetic archives; no new claim is made for a live bundled-runtime, Linux or macOS update in this revision.
+
+Updates take effect at server startup/restart. Cached fallback covers discovery, download and extraction failures; it is not an automatic rollback after a server starts and later encounters a protocol or runtime error.
+
+## Server version selection, 20 September 2026
+
+- The suite now has 25 installer tests and 21 native editor tests, including eight version-picker tests. All 79 tests passed inside Sublime Text 4200 with Python 3.8.12. Standalone Python passed 58 tests and skipped the 21 native tests.
+- Added coverage for exact version pins, cached downgrades without network access, unavailable versions, release-history pagination, matching Windows runtimes, project/global persistence, failed installation preserving settings, and returning to automatic updates.
+- In the isolated editor, selecting 0.3.4 saved the project pin and started that server. A manual restart retained 0.3.4. Choosing Automatic updates cleared the saved pin, enabled updates, and started a healthy 0.3.5 session.
+- The live upstream release list offered supported versions 0.3.4 and 0.3.5. Real protocol checks passed against both versions. No new live platform claim is made beyond Windows x64.

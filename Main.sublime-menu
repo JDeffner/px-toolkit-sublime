@@ -19,6 +19,11 @@
                                 "args": {}
                             },
                             {
+                                "caption": "Choose LSP Version",
+                                "command": "px_server_version",
+                                "args": {}
+                            },
+                            {
                                 "caption": "Reload Script Docs",
                                 "command": "px_report",
                                 "args": {

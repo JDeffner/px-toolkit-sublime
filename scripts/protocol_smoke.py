@@ -1,4 +1,4 @@
-"""Exercise the pinned release over real framed stdio, without Sublime.
+"""Exercise a release over real framed stdio, without Sublime.
 
 Usage: python scripts/protocol_smoke.py --server PATH [--game PATH]
 Writes .dev/protocol-results.json. Fixtures are disposable and contain no game data.
@@ -87,6 +87,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--server', required=True)
     parser.add_argument('--node', default='node')
+    parser.add_argument('--expected-version', default=core.SERVER_VERSION)
     parser.add_argument('--game')
     args = parser.parse_args()
     root = fixture()
@@ -105,7 +106,7 @@ def main():
         init = check('initialize', {'processId': None, 'rootUri': root.as_uri(), 'workspaceFolders': [{'uri': root.as_uri(), 'name': root.name}],
             'capabilities': {'textDocument': {'completion': {'completionItem': {'snippetSupport': True}}}},
             'initializationOptions': {'settings': settings, 'storageDir': str(storage), 'client': {'ownFileWatcher': True, 'hoverHtml': False, 'hoverIcons': False, 'fileLinks': False, 'commands': []}}})
-        assert init['serverInfo']['version'] == core.SERVER_VERSION
+        assert init['serverInfo']['version'] == args.expected_version, init['serverInfo']
         client.send('initialized', {})
         event = root / 'events/px_events.txt'
         text = event.read_text(encoding='utf-8')

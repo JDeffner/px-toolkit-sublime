@@ -23,6 +23,10 @@ properties['calendar'] = {'type': ['object', 'null'], 'required': ['epoch', 'aft
                    'months': {'type': 'array', 'minItems': 12, 'maxItems': 12, 'items': {'type': 'string'}}}}
 px = {
     'server_command': {'type': 'array', 'items': {'type': 'string'}},
+    'auto_update_server': {'type': 'boolean', 'default': True,
+        'description': 'Check for a newer stable server on startup/restart. Disable to keep the cached version.'},
+    'server_version': {'type': ['string', 'null'], 'default': None, 'pattern': r'^\d+\.\d+\.\d+$',
+        'description': 'Pin an exact supported LSP version. Null follows auto_update_server.'},
     'heap_mb': {'type': ['integer', 'null'], 'minimum': 512, 'maximum': 32768},
     'excluded_mods': {'type': 'array', 'items': {'type': 'string'}},
     'watch_interval_seconds': {'type': 'number', 'minimum': 1},

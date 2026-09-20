@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 COMMANDS = [
     ("Setup", "px_setup", {}), ("Restart Server / Rebuild Index", "px_restart", {}),
+    ("Choose LSP Version", "px_server_version", {}),
     ("Reload Script Docs", "px_report", {"feature": "reloadDocs"}),
     ("Index Health", "px_report", {"feature": "indexStats", "readable": True}),
     ("Use Paradox Syntax", "px_use_syntax", {}),
@@ -60,8 +61,8 @@ def write(name, value):
 def main():
     extra = [("Edit Localization in Another Language", "px_localization", {"choose_language": True})]
     write("Default.sublime-commands", [{"caption": "Paradox: " + title, "command": cmd, "args": args} for title, cmd, args in COMMANDS + extra])
-    groups = [("Setup and server", 0, 6), ("Scripts and documentation", 6, 13), ("Localization", 13, 18),
-              ("Events and dynasties", 18, 25), ("GUI tools", 25, 36), ("Authoring and validation", 36, len(COMMANDS))]
+    groups = [("Setup and server", 0, 7), ("Scripts and documentation", 7, 14), ("Localization", 14, 19),
+              ("Events and dynasties", 19, 26), ("GUI tools", 26, 37), ("Authoring and validation", 37, len(COMMANDS))]
     write("Main.sublime-menu", [{"id": "tools", "children": [{"caption": "Paradox Modding", "children": [
         {"caption": group, "children": [{"caption": title, "command": cmd, "args": args} for title, cmd, args in COMMANDS[start:end]]}
         for group, start, end in groups]}]},

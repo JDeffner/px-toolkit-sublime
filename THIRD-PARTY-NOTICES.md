@@ -6,7 +6,7 @@ Syntax grammars, the descriptor field/tag data and `vendor/descriptorMod.ts` ori
 
 Regenerate against an exact matching sibling checkout using `python scripts/vendor_upstream.py ../paradox-modding-toolkit`, then `pnpm dlx esbuild@0.25.12 vendor/descriptorMod.ts --bundle --platform=node --outfile=.dev/descriptor.cjs` and `node scripts/export_descriptor.cjs`. On Windows use `pnpm.cmd` where execution policy blocks the PowerShell shim.
 
-The managed px-lsp server is downloaded separately from the same upstream release. Its source, data provenance and third-party licenses remain upstream; the release directory layout is preserved. Source: [v0.4.3](https://github.com/JDeffner/paradox-modding-toolkit/tree/v0.4.3).
+The managed px-lsp server is downloaded separately from the latest stable [upstream release](https://github.com/JDeffner/paradox-modding-toolkit/releases/latest), with [v0.4.3](https://github.com/JDeffner/paradox-modding-toolkit/tree/v0.4.3) as the bootstrap fallback. Its source, data provenance and third-party licenses remain upstream; the release directory layout is preserved. Each cached installation's `installed.json` records the verified archive hash; the directory name identifies the server version. The corresponding toolkit release provides its source.
 
 ## Sublime LSP and Tiger
 

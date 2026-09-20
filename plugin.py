@@ -392,6 +392,93 @@ class PxRestartCommand(sublime_plugin.WindowCommand):
         restart(self.window)
 
 
+class PxServerVersionCommand(sublime_plugin.WindowCommand):
+    def run(self, version=None, automatic=False):
+        options = copy.deepcopy(configuration(self.window).get("px", {}))
+        if options.get("server_command"):
+            ui.error("Clear px.server_command in your package or project settings before choosing a managed LSP version.")
+            return
+        project_file = self.window.project_file_name()
+        storage = str(Path(sublime.packages_path()).parent / "Package Storage" / NAME)
+
+        def unchanged():
+            return (self.window.is_valid() and self.window.project_file_name() == project_file
+                    and configuration(self.window).get("px", {}) == options)
+
+        def save(selected):
+            if not unchanged():
+                ui.message("Server settings changed. Choose the LSP version again.")
+                return
+            values = {"server_version": selected}
+            if selected is None:
+                values["auto_update_server"] = True
+            project = self.window.project_data() or {}
+            project_px = project.get("settings", {}).get("LSP", {}).get(NAME, {}).get("px", {})
+            if project_file or any(key in project_px for key in values):
+                project.setdefault("settings", {}).setdefault("LSP", {}).setdefault(NAME, {}).setdefault("px", {}).update(values)
+                self.window.set_project_data(project)
+            if not project_file:
+                settings = sublime.load_settings(NAME + ".sublime-settings")
+                settings.set("px", dict(settings.get("px", {}), **values))
+                sublime.save_settings(NAME + ".sublime-settings")
+            restart(self.window)
+            ui.message("LSP version: " + (selected or "automatic updates"))
+
+        def select(selected):
+            if selected is not None:
+                try:
+                    install.version_tuple(selected)
+                except ValueError as exc:
+                    ui.error(exc)
+                    return
+            if not unchanged():
+                ui.message("Server settings changed. Choose the LSP version again.")
+                return
+            ui.message("Preparing LSP " + (selected or "automatic updates") + "...")
+            def prepare():
+                try:
+                    chosen = dict(options, server_version=selected)
+                    if selected is None:
+                        chosen["auto_update_server"] = True
+                    # Do not change settings or stop the current session until installation succeeds.
+                    install.server_command(storage, chosen)
+                    ui.on_main(lambda: save(selected))
+                except install.RELEASE_ERRORS as exc:
+                    ui.error("Could not select LSP version; settings were not changed. " + str(exc))
+            threading.Thread(target=prepare, name="LSP-px version install", daemon=True).start()
+
+        if version is not None or automatic:
+            select(None if automatic else version)
+            return
+
+        def show(versions, cached):
+            if not unchanged():
+                return
+            current = options.get("server_version")
+            rows = [{"label": "Automatic updates", "detail": "Use the newest stable server on startup/restart", "version": None}]
+            for available in sorted(versions, key=install.version_tuple, reverse=True):
+                rows.append({"label": "px-lsp " + available + (" (selected)" if available == current else ""),
+                             "detail": "Cached; keep this version" if available in cached else "Download and keep this version",
+                             "version": available})
+            ui.pick(self.window, "LSP version (" + ("this project" if project_file else "global default") + ")",
+                    rows, lambda row: select(row["version"]))
+
+        def load():
+            try:
+                bundled = install.server_runtime(options) is None
+                cached = install.cached_servers(storage, bundled)
+                versions = set(cached) | {core.SERVER_VERSION}
+                try:
+                    versions.update(install.released_servers(bundled))
+                except install.RELEASE_ERRORS as exc:
+                    ui.message("Release list unavailable; showing cached versions and the bootstrap release. " + str(exc))
+                ui.on_main(lambda: show(versions, cached))
+            except install.RELEASE_ERRORS as exc:
+                ui.error(exc)
+        ui.message("Loading LSP versions...")
+        threading.Thread(target=load, name="LSP-px version list", daemon=True).start()
+
+
 class PxUseSyntaxCommand(sublime_plugin.TextCommand):
     def run(self, edit, mode=None):
         if mode:
@@ -415,6 +502,7 @@ class PxSetupCommand(sublime_plugin.WindowCommand):
             options = [("detect", "Detect CK3 and script-doc paths"), ("gamePath", "Set CK3 game folder"),
                        ("logsPath", "Set CK3 script-doc logs folder"), ("settings", "Open all package settings"),
                        ("semantic", "Enable semantic highlighting (all LSP servers)"),
+                       ("version", "Choose LSP version"),
                        ("tiger", "Install ck3-tiger"), ("help", "Read setup and feature guide")]
             if not HAS_LSP:
                 ui.error("Install the LSP package using Package Control, then restart Sublime. LSP-px requires LSP 2.13 or newer.")
@@ -432,6 +520,8 @@ class PxSetupCommand(sublime_plugin.WindowCommand):
             view.assign_syntax("Packages/Markdown/Markdown.sublime-syntax")
         elif action == "tiger":
             self.window.run_command("px_install_tiger")
+        elif action == "version":
+            self.window.run_command("px_server_version")
         elif action == "detect":
             game, logs = core.detect_game()
             values = {k: v for k, v in (("gamePath", game), ("logsPath", logs)) if v}

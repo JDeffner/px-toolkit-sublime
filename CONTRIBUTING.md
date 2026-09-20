@@ -25,7 +25,7 @@ python scripts/ci_protocol.py
 python scripts/build_package.py
 ```
 
-The protocol check downloads the pinned, hash-verified server on first use. Later runs reuse the cached installation. No JavaScript dependency install is needed for ordinary adapter work. Use pnpm for the upstream generation tools when needed; see [third-party notices](THIRD-PARTY-NOTICES.md).
+The protocol check downloads the pinned, hash-verified bootstrap server on first use. Later runs reuse the cached installation. Run `python scripts/ci_protocol.py --latest` to exercise the automatic updater and verify the latest stable server's reported version and protocol. CI runs both checks. No JavaScript dependency install is needed for ordinary adapter work. Use pnpm for the upstream generation tools when needed; see [third-party notices](THIRD-PARTY-NOTICES.md).
 
 For live source development, clone into a folder named exactly `LSP-px` under an isolated Sublime profile's `Packages` directory. For packed testing, install `dist/LSP-px.sublime-package` in that profile's `Installed Packages` directory. Do not install both forms. Install the separate LSP package before testing, then restart Sublime.
 

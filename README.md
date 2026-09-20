@@ -21,7 +21,11 @@ I don't use Sublime Text regularly, so anyone interested is welcome to take over
 5. Optionally run **Paradox: Enable Semantic Highlighting** and choose the **Paradox** color scheme. This toggle affects all LSP servers. Inlay hints are enabled for the CK3 window; use LSP's inlay-hint toggle to hide them.
 6. Run **Paradox: Install Tiger**, save your changes, then **Paradox: Run Tiger Validation** for deep CK3 checks. This is separate from the LSP's lightweight diagnostics.
 
-The managed server is pinned to **px-lsp 0.3.4**, from toolkit **v0.4.3**. Downloads are verified against SHA-256 hashes and extracted into `Package Storage/LSP-px`, never executed inside the packed package. Existing installations work offline. Node.js 18+ is the runtime minimum; use a maintained Node release. Windows x64 can download the upstream bundled runtime when Node is absent. Linux/macOS need an installed Node runtime. Set `px.node_path` if Sublime cannot find it.
+The managed server checks the upstream GitHub release on each startup or restart and installs newer stable px-lsp versions automatically. It verifies downloads against the release asset's SHA-256 digest and extracts each version into its own directory under `Package Storage/LSP-px`. Running sessions keep their current server until restarted. Offline, rate-limited, or failed updates keep the newest complete cached installation. A first install falls back to the pinned **px-lsp 0.3.4** bootstrap from toolkit **v0.4.3** if release discovery fails. Set `px.auto_update_server` to `false` to keep the cached version without update checks; with no cache, this installs the bootstrap version. Syntax grammars and descriptor metadata update with the Sublime package, separately from the server.
+
+Node.js 18+ is the runtime minimum; use a maintained Node release. Windows x64 can download and update the upstream bundled runtime with the server when Node is absent. Linux/macOS need an installed Node runtime. Set `px.node_path` if Sublime cannot find it.
+
+To use an earlier server, run **Paradox: Choose LSP Version** from the command palette, Setup, or Tools menu. Choose a supported stable version (0.3.4 or newer) to download, verify and pin it, then restart the server automatically. The choice is saved in the current `.sublime-project`, or in global package settings when no saved project is open. Cached versions remain selectable offline. A failed download leaves settings and the running session unchanged. Choose **Automatic updates** to clear the pin and enable updates again. You can also set `px.server_version` directly, for example `"0.3.4"`; a pin takes priority over `auto_update_server`. Custom `server_command` settings still take priority over managed versions.
 
 Windows x64 has been exercised locally with the real editor and CK3 installation. CI checks are configured for Windows, Linux and macOS; consult the workflow results and [validation record](docs/VALIDATION.md) before treating another platform as verified. Automatic Tiger installation supports Windows/Linux x64. Other architectures and macOS require a separately installed `ck3-tiger` through `px.tiger_path`.
 
@@ -97,6 +101,8 @@ All sixteen are forwarded as a complete resolved object through the server's cus
 | Adapter setting | Meaning |
 | --- | --- |
 | `server_command` | Exact argument array for a manual/offline server; bypass managed installation |
+| `auto_update_server` | Default `true`: check for newer stable servers on startup/restart; `false` keeps the newest cached version |
+| `server_version` | Default `null`: follow `auto_update_server`; an exact version such as `"0.3.4"` pins that server, including an older cached version |
 | `node_path` | Explicit Node executable |
 | `heap_mb` | `null`: upstream policy, half RAM bounded to 2048–4096 MiB; explicit range 512–32768 |
 | `storage_dir` | Override server cache directory |
@@ -124,14 +130,14 @@ Tiger validates **saved files**. Unsaved files prevent a new run. A rejected rep
 
 - Provider guards remain upstream: rename is restricted to supported mod-owned script identifiers. GUI/localization initiation, inherited/vanilla identifiers and named graphics assets are not made renameable by this package.
 - Formatting is the server's script document formatter. No range/on-type formatter, broad style controls, or equivalent GUI/localization formatter is added.
-- No call/type hierarchy, implementation/declaration/type-definition provider, semantic selection ranges, document highlights, document-link provider, code lenses, file-rename reference updates, or general refactoring provider exists in the pinned server.
+- No call/type hierarchy, implementation/declaration/type-definition provider, semantic selection ranges, document highlights, document-link provider, code lenses, file-rename reference updates, or general refactoring provider exists in the bootstrap server. Later server releases may add providers independently of this package.
 - GUI layouts and save values are static data. There is no native JavaScript/canvas designer, live game renderer, debugger, event execution, or runtime scope inspection. Ironman/binary saves remain unsupported.
 - Theme-banner/texture paths are navigable. This package does not add DDS conversion, a graphical dynasty/event canvas, a coat-of-arms editor, Workshop publishing, or an arbitrary color picker. DDS image hover rendering still needs a visual acceptance check.
 - Signature help, completion richness and localization resolution depend on the server's knowledge and the loaded game/mod context. Missing game/log paths reduce available information.
 
 ## Troubleshooting and development
 
-Use **Paradox: Index Health**, **LSP: Troubleshoot Server**, **LSP: Toggle Log Panel**, and **Paradox: Restart Server / Rebuild Index**. If LSP was installed after this package, restart Sublime. If a manual server reports an older version, use the pinned release. If a download fails, inspect the error; a checksum failure does not replace an existing installation. For a damaged installation, close Sublime, move the specific version directory under `Package Storage/LSP-px` aside, and restart.
+Use **Paradox: Index Health**, **LSP: Troubleshoot Server**, **LSP: Toggle Log Panel**, and **Paradox: Restart Server / Rebuild Index**. If LSP was installed after this package, restart Sublime. Manual servers must report px-lsp 0.3.4 or newer. Automatic update failures are logged in Sublime's console and keep the cached server; a checksum failure does not replace an existing installation. For a damaged installation, close Sublime, move the specific version directory under `Package Storage/LSP-px` aside, and restart. Use **Paradox: Choose LSP Version** to roll back or return to automatic updates. An unavailable pinned version reports an error instead of silently starting a different version.
 
 Build: `python scripts/build_package.py`. Pure tests: `python -m unittest discover -s tests -v`. Real wire tests: `python scripts/ci_protocol.py`. Native CI uses [SublimeText/UnitTesting](https://github.com/SublimeText/UnitTesting). See [development and validation](docs/VALIDATION.md), [release checklist](docs/RELEASING.md), and [source notices](THIRD-PARTY-NOTICES.md).
 
