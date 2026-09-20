@@ -10,11 +10,11 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - run: python -m unittest discover -s tests -v
@@ -22,7 +22,7 @@ jobs:
       - run: python scripts/ci_protocol.py
       - run: python scripts/ci_protocol.py --latest
       - run: python scripts/build_package.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: package-${{ matrix.os }}
           path: dist/LSP-px.sublime-package
@@ -33,7 +33,7 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: SublimeText/UnitTesting/actions/setup@v1
         with:
           package-name: LSP-px
