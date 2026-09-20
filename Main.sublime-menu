@@ -1,0 +1,381 @@
+[
+    {
+        "id": "tools",
+        "children": [
+            {
+                "caption": "Paradox Modding",
+                "children": [
+                    {
+                        "caption": "Setup and server",
+                        "children": [
+                            {
+                                "caption": "Setup",
+                                "command": "px_setup",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Restart Server / Rebuild Index",
+                                "command": "px_restart",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Choose LSP Version",
+                                "command": "px_server_version",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Reload Script Docs",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "reloadDocs"
+                                }
+                            },
+                            {
+                                "caption": "Index Health",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "indexStats",
+                                    "readable": true
+                                }
+                            },
+                            {
+                                "caption": "Use Paradox Syntax",
+                                "command": "px_use_syntax",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Enable Semantic Highlighting (all LSP servers)",
+                                "command": "px_enable_semantic",
+                                "args": {}
+                            }
+                        ]
+                    },
+                    {
+                        "caption": "Scripts and documentation",
+                        "children": [
+                            {
+                                "caption": "Insert Snippet",
+                                "command": "px_snippets",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Browse All Generated Snippets",
+                                "command": "px_snippets",
+                                "args": {
+                                    "catalogue": true
+                                }
+                            },
+                            {
+                                "caption": "Export Generated Snippets",
+                                "command": "px_snippets",
+                                "args": {
+                                    "export": true
+                                }
+                            },
+                            {
+                                "caption": "Examples Wiki",
+                                "command": "px_examples",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Inspect Scope at Cursor",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "scopeAt"
+                                }
+                            },
+                            {
+                                "caption": "Browse Definition Dependencies",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "dependencies"
+                                }
+                            },
+                            {
+                                "caption": "Mod Inventory",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "modOverview"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "caption": "Localization",
+                        "children": [
+                            {
+                                "caption": "Localization Coverage",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "locCoverage"
+                                }
+                            },
+                            {
+                                "caption": "Override Winners",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "overrides"
+                                }
+                            },
+                            {
+                                "caption": "Edit / Create Localization",
+                                "command": "px_localization",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Open Localization Side by Side",
+                                "command": "px_localization",
+                                "args": {
+                                    "side": true,
+                                    "edit_value": false
+                                }
+                            },
+                            {
+                                "caption": "Preview Localization Text",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "locText"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "caption": "Events and dynasties",
+                        "children": [
+                            {
+                                "caption": "Event Relationships",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "eventGraph"
+                                }
+                            },
+                            {
+                                "caption": "Inspect Event",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "eventDetail"
+                                }
+                            },
+                            {
+                                "caption": "Event Vocabulary",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "eventVocabulary"
+                                }
+                            },
+                            {
+                                "caption": "Browse Values for a Definition",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "eventValueOptions"
+                                }
+                            },
+                            {
+                                "caption": "Resolve Event Theme Banner",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "eventBanner"
+                                }
+                            },
+                            {
+                                "caption": "Browse Dynasties",
+                                "command": "px_dynasty",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Modifier Display Formats",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "modifierFormats"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "caption": "GUI tools",
+                        "children": [
+                            {
+                                "caption": "GUI Widget Outline",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "guiTree"
+                                }
+                            },
+                            {
+                                "caption": "Inspect GUI Widget",
+                                "command": "px_gui",
+                                "args": {}
+                            },
+                            {
+                                "caption": "GUI Dependencies",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "guiDependencies"
+                                }
+                            },
+                            {
+                                "caption": "Inspect Static GUI Layout",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "guiLayout"
+                                }
+                            },
+                            {
+                                "caption": "Browse GUI Widget Palette",
+                                "command": "px_gui",
+                                "args": {
+                                    "action": "palette"
+                                }
+                            },
+                            {
+                                "caption": "Edit GUI Widget Property",
+                                "command": "px_gui",
+                                "args": {
+                                    "action": "set"
+                                }
+                            },
+                            {
+                                "caption": "Insert Child GUI Widget",
+                                "command": "px_gui",
+                                "args": {
+                                    "action": "insert"
+                                }
+                            },
+                            {
+                                "caption": "Duplicate GUI Widget",
+                                "command": "px_gui",
+                                "args": {
+                                    "action": "duplicate"
+                                }
+                            },
+                            {
+                                "caption": "Delete GUI Widget",
+                                "command": "px_gui",
+                                "args": {
+                                    "action": "delete"
+                                }
+                            },
+                            {
+                                "caption": "Copy GUI Widget Source",
+                                "command": "px_gui",
+                                "args": {
+                                    "action": "blockText"
+                                }
+                            },
+                            {
+                                "caption": "Load Save Values for GUI Preview",
+                                "command": "px_report",
+                                "args": {
+                                    "feature": "guiSaveValues"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "caption": "Authoring and validation",
+                        "children": [
+                            {
+                                "caption": "New Mod",
+                                "command": "px_new_mod",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Create Definition",
+                                "command": "px_definition",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Inspect Definition Schema",
+                                "command": "px_definition",
+                                "args": {
+                                    "action": "inspect"
+                                }
+                            },
+                            {
+                                "caption": "Edit Definition Property",
+                                "command": "px_definition",
+                                "args": {
+                                    "action": "property"
+                                }
+                            },
+                            {
+                                "caption": "Descriptor Validation Report",
+                                "command": "px_descriptor_report",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Create Mod Descriptor",
+                                "command": "px_create_descriptor",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Open Mod Calendar",
+                                "command": "px_config_file",
+                                "args": {
+                                    "kind": "calendar"
+                                }
+                            },
+                            {
+                                "caption": "Open Dependency Playset",
+                                "command": "px_config_file",
+                                "args": {
+                                    "kind": "playset"
+                                }
+                            },
+                            {
+                                "caption": "Open Schema Overlay",
+                                "command": "px_config_file",
+                                "args": {
+                                    "kind": "schema"
+                                }
+                            },
+                            {
+                                "caption": "Install Tiger",
+                                "command": "px_install_tiger",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Run Tiger Validation",
+                                "command": "px_tiger",
+                                "args": {}
+                            },
+                            {
+                                "caption": "Cancel Tiger Validation",
+                                "command": "px_tiger",
+                                "args": {
+                                    "cancel": true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "preferences",
+        "children": [
+            {
+                "id": "package-settings",
+                "children": [
+                    {
+                        "caption": "LSP-px",
+                        "children": [
+                            {
+                                "caption": "Settings",
+                                "command": "edit_settings",
+                                "args": {
+                                    "base_file": "Packages/LSP-px/LSP-px.sublime-settings"
+                                }
+                            },
+                            {
+                                "caption": "Setup",
+                                "command": "px_setup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

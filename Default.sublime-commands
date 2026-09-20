@@ -1,0 +1,322 @@
+[
+    {
+        "caption": "Paradox: Setup",
+        "command": "px_setup",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Restart Server / Rebuild Index",
+        "command": "px_restart",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Choose LSP Version",
+        "command": "px_server_version",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Reload Script Docs",
+        "command": "px_report",
+        "args": {
+            "feature": "reloadDocs"
+        }
+    },
+    {
+        "caption": "Paradox: Index Health",
+        "command": "px_report",
+        "args": {
+            "feature": "indexStats",
+            "readable": true
+        }
+    },
+    {
+        "caption": "Paradox: Use Paradox Syntax",
+        "command": "px_use_syntax",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Enable Semantic Highlighting (all LSP servers)",
+        "command": "px_enable_semantic",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Insert Snippet",
+        "command": "px_snippets",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Browse All Generated Snippets",
+        "command": "px_snippets",
+        "args": {
+            "catalogue": true
+        }
+    },
+    {
+        "caption": "Paradox: Export Generated Snippets",
+        "command": "px_snippets",
+        "args": {
+            "export": true
+        }
+    },
+    {
+        "caption": "Paradox: Examples Wiki",
+        "command": "px_examples",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Inspect Scope at Cursor",
+        "command": "px_report",
+        "args": {
+            "feature": "scopeAt"
+        }
+    },
+    {
+        "caption": "Paradox: Browse Definition Dependencies",
+        "command": "px_report",
+        "args": {
+            "feature": "dependencies"
+        }
+    },
+    {
+        "caption": "Paradox: Mod Inventory",
+        "command": "px_report",
+        "args": {
+            "feature": "modOverview"
+        }
+    },
+    {
+        "caption": "Paradox: Localization Coverage",
+        "command": "px_report",
+        "args": {
+            "feature": "locCoverage"
+        }
+    },
+    {
+        "caption": "Paradox: Override Winners",
+        "command": "px_report",
+        "args": {
+            "feature": "overrides"
+        }
+    },
+    {
+        "caption": "Paradox: Edit / Create Localization",
+        "command": "px_localization",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Open Localization Side by Side",
+        "command": "px_localization",
+        "args": {
+            "side": true,
+            "edit_value": false
+        }
+    },
+    {
+        "caption": "Paradox: Preview Localization Text",
+        "command": "px_report",
+        "args": {
+            "feature": "locText"
+        }
+    },
+    {
+        "caption": "Paradox: Event Relationships",
+        "command": "px_report",
+        "args": {
+            "feature": "eventGraph"
+        }
+    },
+    {
+        "caption": "Paradox: Inspect Event",
+        "command": "px_report",
+        "args": {
+            "feature": "eventDetail"
+        }
+    },
+    {
+        "caption": "Paradox: Event Vocabulary",
+        "command": "px_report",
+        "args": {
+            "feature": "eventVocabulary"
+        }
+    },
+    {
+        "caption": "Paradox: Browse Values for a Definition",
+        "command": "px_report",
+        "args": {
+            "feature": "eventValueOptions"
+        }
+    },
+    {
+        "caption": "Paradox: Resolve Event Theme Banner",
+        "command": "px_report",
+        "args": {
+            "feature": "eventBanner"
+        }
+    },
+    {
+        "caption": "Paradox: Browse Dynasties",
+        "command": "px_dynasty",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Modifier Display Formats",
+        "command": "px_report",
+        "args": {
+            "feature": "modifierFormats"
+        }
+    },
+    {
+        "caption": "Paradox: GUI Widget Outline",
+        "command": "px_report",
+        "args": {
+            "feature": "guiTree"
+        }
+    },
+    {
+        "caption": "Paradox: Inspect GUI Widget",
+        "command": "px_gui",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: GUI Dependencies",
+        "command": "px_report",
+        "args": {
+            "feature": "guiDependencies"
+        }
+    },
+    {
+        "caption": "Paradox: Inspect Static GUI Layout",
+        "command": "px_report",
+        "args": {
+            "feature": "guiLayout"
+        }
+    },
+    {
+        "caption": "Paradox: Browse GUI Widget Palette",
+        "command": "px_gui",
+        "args": {
+            "action": "palette"
+        }
+    },
+    {
+        "caption": "Paradox: Edit GUI Widget Property",
+        "command": "px_gui",
+        "args": {
+            "action": "set"
+        }
+    },
+    {
+        "caption": "Paradox: Insert Child GUI Widget",
+        "command": "px_gui",
+        "args": {
+            "action": "insert"
+        }
+    },
+    {
+        "caption": "Paradox: Duplicate GUI Widget",
+        "command": "px_gui",
+        "args": {
+            "action": "duplicate"
+        }
+    },
+    {
+        "caption": "Paradox: Delete GUI Widget",
+        "command": "px_gui",
+        "args": {
+            "action": "delete"
+        }
+    },
+    {
+        "caption": "Paradox: Copy GUI Widget Source",
+        "command": "px_gui",
+        "args": {
+            "action": "blockText"
+        }
+    },
+    {
+        "caption": "Paradox: Load Save Values for GUI Preview",
+        "command": "px_report",
+        "args": {
+            "feature": "guiSaveValues"
+        }
+    },
+    {
+        "caption": "Paradox: New Mod",
+        "command": "px_new_mod",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Create Definition",
+        "command": "px_definition",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Inspect Definition Schema",
+        "command": "px_definition",
+        "args": {
+            "action": "inspect"
+        }
+    },
+    {
+        "caption": "Paradox: Edit Definition Property",
+        "command": "px_definition",
+        "args": {
+            "action": "property"
+        }
+    },
+    {
+        "caption": "Paradox: Descriptor Validation Report",
+        "command": "px_descriptor_report",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Create Mod Descriptor",
+        "command": "px_create_descriptor",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Open Mod Calendar",
+        "command": "px_config_file",
+        "args": {
+            "kind": "calendar"
+        }
+    },
+    {
+        "caption": "Paradox: Open Dependency Playset",
+        "command": "px_config_file",
+        "args": {
+            "kind": "playset"
+        }
+    },
+    {
+        "caption": "Paradox: Open Schema Overlay",
+        "command": "px_config_file",
+        "args": {
+            "kind": "schema"
+        }
+    },
+    {
+        "caption": "Paradox: Install Tiger",
+        "command": "px_install_tiger",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Run Tiger Validation",
+        "command": "px_tiger",
+        "args": {}
+    },
+    {
+        "caption": "Paradox: Cancel Tiger Validation",
+        "command": "px_tiger",
+        "args": {
+            "cancel": true
+        }
+    },
+    {
+        "caption": "Paradox: Edit Localization in Another Language",
+        "command": "px_localization",
+        "args": {
+            "choose_language": true
+        }
+    }
+]

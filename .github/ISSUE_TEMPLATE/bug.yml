@@ -1,0 +1,25 @@
+name: Bug report
+description: Report an editor, language server, or authoring problem
+body:
+  - type: markdown
+    attributes:
+      value: "For security vulnerabilities, use https://github.com/JDeffner/px-toolkit-sublime/security/advisories/new instead of a public issue. Do not include credentials, private mods, saves, or game assets."
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include steps, expected behavior, and a small script sample if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Versions and setup
+      description: OS, Sublime build, LSP version, LSP-px version, server version, CK3 version, and Tiger version if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Use Paradox Index Health and LSP Troubleshoot Server. Remove personal paths before posting. Do not upload game files or entire mods.

@@ -1,0 +1,238 @@
+{
+  "contributions": {
+    "settings": [
+      {
+        "file_patterns": [
+          "LSP-px.sublime-settings"
+        ],
+        "schema": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "settings": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "gameId": {
+                  "type": "string",
+                  "default": "ck3",
+                  "enum": [
+                    "ck3"
+                  ]
+                },
+                "gamePath": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null
+                },
+                "logsPath": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null
+                },
+                "modPath": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null
+                },
+                "parentPaths": {
+                  "type": "array",
+                  "default": [],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "workspaceMods": {
+                  "type": "array",
+                  "default": [],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "locLanguage": {
+                  "type": "string",
+                  "default": "english",
+                  "pattern": "^[a-z_]+$"
+                },
+                "completionMode": {
+                  "type": "string",
+                  "default": "minimal",
+                  "enum": [
+                    "minimal",
+                    "examples",
+                    "names"
+                  ]
+                },
+                "hoverDetail": {
+                  "type": "string",
+                  "default": "standard",
+                  "enum": [
+                    "compact",
+                    "standard",
+                    "full"
+                  ]
+                },
+                "scopeInlayHints": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "indexAssets": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "calendar": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "required": [
+                    "epoch",
+                    "after"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "epoch": {
+                      "type": "integer"
+                    },
+                    "after": {
+                      "type": "string"
+                    },
+                    "before": {
+                      "type": "string"
+                    },
+                    "months": {
+                      "type": "array",
+                      "minItems": 12,
+                      "maxItems": 12,
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "diagnosticsIgnore": {
+                  "type": "array",
+                  "default": [],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "diagnosticsIgnorePatterns": {
+                  "type": "array",
+                  "default": [],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "diagnosticsVanilla": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "tracePerf": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "px": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "server_command": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "auto_update_server": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Check for a newer stable server on startup/restart. Disable to keep the cached version."
+                },
+                "server_version": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "default": null,
+                  "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                  "description": "Pin an exact supported LSP version. Null follows auto_update_server."
+                },
+                "heap_mb": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 512,
+                  "maximum": 32768
+                },
+                "excluded_mods": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "watch_interval_seconds": {
+                  "type": "number",
+                  "minimum": 1
+                },
+                "tiger_timeout_seconds": {
+                  "type": "number",
+                  "minimum": 1
+                },
+                "tiger_run_on": {
+                  "enum": [
+                    "manual",
+                    "save"
+                  ]
+                },
+                "node_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "storage_dir": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "data_dir": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "tiger_path": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "detect_syntax": {
+                  "type": "boolean"
+                },
+                "inlay_hints": {
+                  "type": "boolean"
+                },
+                "require_descriptor": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "$id": "sublime://settings/LSP-px"
+        }
+      }
+    ]
+  }
+}

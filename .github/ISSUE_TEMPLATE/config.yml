@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://github.com/JDeffner/px-toolkit-sublime/security/advisories/new
+    about: Do not disclose vulnerabilities in public issues. See SECURITY.md for the reporting policy.
+  - name: Documentation and troubleshooting
+    url: https://github.com/JDeffner/px-toolkit-sublime/wiki
+    about: Installation, settings, supported features, authoring, and troubleshooting.
