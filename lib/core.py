@@ -14,7 +14,7 @@ from urllib.parse import unquote, urlsplit
 
 SERVER_VERSION = "0.3.8"
 MIN_SERVER_VERSION = "0.3.4"
-PACKAGE_VERSION = "0.1.0-rc.3"
+PACKAGE_VERSION = "0.1.0"
 SETTINGS = {
     "gameId": "ck3", "gamePath": None, "logsPath": None, "modPath": None,
     "parentPaths": [], "workspaceMods": [], "locLanguage": "english",

@@ -1,6 +1,6 @@
-# LSP-px 0.1.0-rc.3
+# LSP-px 0.1.0
 
-CK3 modding in Sublime Text 4, powered by Paradox Language Server. This candidate uses **px-lsp 0.3.8 from the toolkit v0.5.5 prerelease**. It requires Sublime Text build 4200 or newer and the separate LSP package, version 2.13 or newer.
+CK3 modding in Sublime Text 4, powered by Paradox Language Server. This release uses **px-lsp 0.3.8 from the toolkit v0.5.5 prerelease**. It requires Sublime Text build 4200 or newer and the separate LSP package, version 2.13 or newer.
 
 ## Changes
 
@@ -23,4 +23,4 @@ I do not plan much further development of this Sublime Text package. My focus is
 
 ## Install
 
-Install **LSP** through Package Control, then copy `LSP-px.sublime-package` into Sublime's **Installed Packages** directory. Restart Sublime and run **Paradox: Setup**. The package is not yet listed in Package Control. See the [README](https://github.com/JDeffner/px-toolkit-sublime/blob/v0.1.0-rc.3/README.md) for full setup and platform requirements, and the [validation record](https://github.com/JDeffner/px-toolkit-sublime/blob/v0.1.0-rc.3/docs/VALIDATION.md) for test results and scope.
+Install **LSP** through Package Control, then copy `LSP-px.sublime-package` into Sublime's **Installed Packages** directory. Restart Sublime and run **Paradox: Setup**. The package is not yet listed in Package Control. See the [README](https://github.com/JDeffner/px-toolkit-sublime/blob/v0.1.0/README.md) for full setup and platform requirements, and the [validation record](https://github.com/JDeffner/px-toolkit-sublime/blob/v0.1.0/docs/VALIDATION.md) for test results and scope.

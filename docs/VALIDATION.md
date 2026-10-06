@@ -2,9 +2,9 @@
 
 This file distinguishes performed checks from configured or outstanding checks.
 
-## Current candidate, 6 October 2026
+## Release 0.1.0, 6 October 2026
 
-The 0.1.0-rc.3 candidate uses px-lsp 0.3.8 and the script grammar from toolkit v0.5.5, an upstream prerelease at commit `4a3e210a74d40af91907f52753dd118f8fe8c3ea`. Older supported server pins still start at 0.3.4. This is local prerelease evidence; it does not replace final-commit CI.
+Release 0.1.0 uses px-lsp 0.3.8 and the script grammar from toolkit v0.5.5, an upstream prerelease at commit `4a3e210a74d40af91907f52753dd118f8fe8c3ea`. Older supported server pins still start at 0.3.4. The local checks below were performed on 0.1.0-rc.3. Release 0.1.0 retains that implementation and changes only the package version and release documentation; final-commit CI is still required.
 
 | Check | Result |
 | --- | --- |
@@ -29,7 +29,7 @@ The final package is built twice and checked for equal SHA-256 hashes. `dist/SHA
 
 The release procedure requires all six platform jobs to pass on the tagged revision. See [Package checks](https://github.com/JDeffner/px-toolkit-sublime/actions/workflows/test.yml) for the revision-specific result. Local Windows evidence does not establish Linux or macOS acceptance. The CI protocol runner now authenticates GitHub API metadata requests with the job token to avoid the shared unauthenticated rate limit that affected the previous macOS run. The token is not sent to release-asset downloads.
 
-This version uses a prerelease tag because its upstream 0.5.5 baseline is a prerelease. Package Control acceptance is separate from GitHub publication. No new in-game or large total-conversion performance claim is made.
+The package is a normal release. Its upstream 0.5.5 baseline remains identified as a prerelease; the two projects have separate release statuses. Package Control acceptance is separate from GitHub publication. No new in-game or large total-conversion performance claim is made.
 
 ## Historical validation
 
@@ -82,7 +82,7 @@ For local Windows editor integration:
 1. `python scripts/setup_sublime_test.py` copies an installed Sublime into `.dev/sublime`.
 2. Build with `--install ".dev/sublime/Data/Installed Packages"`.
 3. Start the portable executable; wait for the harness to install LSP and its libraries. Restart the portable instance after dependencies finish installing. The harness records bootstrap results under `Data/`.
-4. `scripts/protocol_smoke.py` creates `.dev/fixture mod Ã¼`. Its fixture includes intentionally incomplete game content suitable for navigation and diagnostics tests.
+4. `scripts/protocol_smoke.py` creates `.dev/fixture mod ÃƒÂ¼`. Its fixture includes intentionally incomplete game content suitable for navigation and diagnostics tests.
 5. Create portable `Data/editor-config.json` with absolute `node`, `server`, `game`, and optional `tiger` paths. Copy `scripts/editor_integration.py` to portable `Data/integration.py`; run portable `subl.exe --command px_test_run`. Inspect `Data/editor.json` for `complete: true` and no failures.
 
 The test harness and scripts are excluded from the public `.sublime-package`. Do not install the harness into a normal profile. CI uses the separate UnitTesting tests in `tests/test_editor.py` and requires no CK3 game assets.

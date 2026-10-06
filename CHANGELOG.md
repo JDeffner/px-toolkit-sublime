@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0, 6 October 2026
+
+- Publish the verified 0.1.0-rc.3 functionality as a normal release. Keep the tested px-lsp 0.3.8 baseline from toolkit v0.5.5, which upstream marks as a prerelease.
+
 ## 0.1.0-rc.3, 6 October 2026
 
 - Use px-lsp 0.3.8 from toolkit v0.5.5 (prerelease) as the tested baseline, while keeping version pins and cached rollback to 0.3.4 or newer.
