@@ -70,8 +70,8 @@ def request(window, method, params, callback, view=None):
         return
     session = obj.weaksession()
     version = re.match(r"(\d+)\.(\d+)\.(\d+)", obj.version or "")
-    if version and tuple(int(n) for n in version.groups()) < (0, 3, 4):
-        ui.error("This package needs px-lsp 0.3.4 or newer; this server reports " + obj.version)
+    if version and tuple(int(n) for n in version.groups()) < install.version_tuple(core.MIN_SERVER_VERSION):
+        ui.error("This package needs px-lsp " + core.MIN_SERVER_VERSION + " or newer; this server reports " + obj.version)
         return
     def receive(result):
         try:
@@ -455,10 +455,13 @@ class PxServerVersionCommand(sublime_plugin.WindowCommand):
             if not unchanged():
                 return
             current = options.get("server_version")
-            rows = [{"label": "Automatic updates", "detail": "Use the newest stable server on startup/restart", "version": None}]
+            rows = [{"label": "Automatic updates", "detail": "Use the tested package baseline or a newer stable server", "version": None}]
             for available in sorted(versions, key=install.version_tuple, reverse=True):
+                detail = "Cached; keep this version" if available in cached else "Download and keep this version"
+                if available == core.SERVER_VERSION:
+                    detail = "Package baseline (toolkit 0.5.5 prerelease); " + detail.lower()
                 rows.append({"label": "px-lsp " + available + (" (selected)" if available == current else ""),
-                             "detail": "Cached; keep this version" if available in cached else "Download and keep this version",
+                             "detail": detail,
                              "version": available})
             ui.pick(self.window, "LSP version (" + ("this project" if project_file else "global default") + ")",
                     rows, lambda row: select(row["version"]))
@@ -734,7 +737,8 @@ class PxLocalizationCommand(sublime_plugin.WindowCommand):
                     if side:
                         if self.window.num_groups() < 2:
                             self.window.set_layout({"cols": [0, 0.5, 1], "rows": [0, 1], "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]})
-                        opened = self.window.open_file(destination, group=(self.window.active_group() + 1) % self.window.num_groups())
+                        opened = self.window.open_file(destination, sublime.FORCE_GROUP,
+                                                       group=(self.window.active_group() + 1) % self.window.num_groups())
                     else:
                         opened = self.window.open_file(destination)
                     def write(buffer):

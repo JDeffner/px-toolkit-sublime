@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-PIN = "f517501e0edb83fb0473a5db1c2a9c42afb06886"
+PIN = "4a3e210a74d40af91907f52753dd118f8fe8c3ea"
 
 
 def main():

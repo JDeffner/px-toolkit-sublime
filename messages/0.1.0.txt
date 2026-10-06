@@ -1,5 +1,10 @@
-0.1.0 — Initial native CK3 package
+0.1.0 - Native CK3 package for Sublime Text
 
-Standard LSP editing, all sixteen server settings, native index/documentation
-tools, localization writing, GUI source editing, definition authoring, and Tiger.
-The guide lists current provider and platform limitations.
+Standard LSP editing, seventeen server settings, native documentation and index tools, localization editing, GUI source editing, definition authoring, and Tiger validation.
+
+This candidate uses px-lsp 0.3.8 from toolkit v0.5.5, an upstream prerelease. Automatic updates use this tested baseline or a newer stable server. Use Paradox: Choose LSP Version to pin an older supported version.
+
+Limited maintenance: I do not plan much further development of this Sublime Text package. The main Paradox Modding Toolkit is my priority. I may fix bugs when time allows, but there is no planned feature or release schedule. Contributions and a new maintainer are welcome.
+
+Documentation: https://github.com/JDeffner/px-toolkit-sublime/wiki
+Maintenance handover: https://github.com/JDeffner/px-toolkit-sublime/issues

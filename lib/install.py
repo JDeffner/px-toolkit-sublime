@@ -19,17 +19,17 @@ import urllib.request
 import zipfile
 from pathlib import Path, PurePosixPath
 
-from .core import SERVER_VERSION
+from .core import MIN_SERVER_VERSION, SERVER_VERSION
 
 LOCK = threading.RLock()
 RELEASES = "https://api.github.com/repos/JDeffner/paradox-modding-toolkit/releases/latest"
 RELEASE_HISTORY = "https://api.github.com/repos/JDeffner/paradox-modding-toolkit/releases"
 DOWNLOADS = "https://github.com/JDeffner/paradox-modding-toolkit/releases/download/"
 RELEASE_ERRORS = (OSError, ValueError, EOFError, http.client.HTTPException, tarfile.TarError, zipfile.BadZipFile)
-# Bootstrap release for a first install when release discovery is unavailable.
-BASE = "https://github.com/JDeffner/paradox-modding-toolkit/releases/download/v0.4.3/"
-SERVER = (BASE + "px-lsp-server-0.3.4.tar.gz", "0d6d0dc37229d3a7e1e82b72abcff2d248a57ef7e0b9f327f2f5c0d70ebee7a7")
-WINDOWS = (BASE + "px-lsp-win-x64-0.3.4.zip", "2f308b7de406df02aa3ed75112ce0e6ed09d616157f1c1f30e8b6443c5af422b")
+# Tested baseline, including its exact upstream prerelease when selected.
+BASE = "https://github.com/JDeffner/paradox-modding-toolkit/releases/download/v0.5.5/"
+SERVER = (BASE + "px-lsp-server-0.3.8.tar.gz", "10f75bba2c4a927a120a45cab3d0255ea2c373003b8c8addeb22ef52241f6664")
+WINDOWS = (BASE + "px-lsp-win-x64-0.3.8.zip", "8f01ffbee94c43bbf0b2590d5c99e318abf3600c44c988d73c7b76394c6faa15")
 TIGER_VERSION = "1.19.0"
 TIGER = {
     "Windows": ("https://github.com/amtep/tiger/releases/download/v1.19.0/ck3-tiger-windows-v1.19.0.zip", "ddafd73abcff8e802b82bf3ae622d02c04dfc8a9dd0cad44b2dbf67568a10505"),
@@ -80,7 +80,7 @@ def server_assets(release, bundled_node=False):
         if not isinstance(asset, dict) or not isinstance(asset.get("name"), str):
             continue
         match = re.fullmatch(pattern, asset["name"])
-        if match and version_tuple(match[1]) >= version_tuple(SERVER_VERSION):
+        if match and version_tuple(match[1]) >= version_tuple(MIN_SERVER_VERSION):
             candidates.append((version_tuple(match[1]), match[1], asset))
     return candidates
 
@@ -239,7 +239,7 @@ def cached_servers(storage, bundled_node=False):
     cached = {}
     for directory in Path(storage).glob("server-*"):
         match = re.fullmatch(pattern, directory.name)
-        if match and version_tuple(match[1]) >= version_tuple(SERVER_VERSION):
+        if match and version_tuple(match[1]) >= version_tuple(MIN_SERVER_VERSION):
             entry = installed_entry(directory, "server.js", bundled_node=bundled_node)
             if entry:
                 cached[match[1]] = entry
@@ -250,8 +250,8 @@ def managed_server(storage, bundled_node=False, auto_update=True, version=None):
     """Select the newest verified installation, updating only between sessions."""
     if not isinstance(auto_update, bool):
         raise ValueError("auto_update_server must be true or false")
-    if version is not None and version_tuple(version) < version_tuple(SERVER_VERSION):
-        raise ValueError("This package requires px-lsp " + SERVER_VERSION + " or newer")
+    if version is not None and version_tuple(version) < version_tuple(MIN_SERVER_VERSION):
+        raise ValueError("This package requires px-lsp " + MIN_SERVER_VERSION + " or newer")
     suffix = "-win" if bundled_node else ""
     with LOCK:
         cached = cached_servers(storage, bundled_node)
@@ -267,6 +267,10 @@ def managed_server(storage, bundled_node=False, auto_update=True, version=None):
         if auto_update:
             try:
                 version, artifact = latest_server(bundled_node)
+                # A package may deliberately ship a newer tested prerelease.
+                # Never let the stable-release endpoint replace that baseline.
+                if version_tuple(version) < version_tuple(SERVER_VERSION):
+                    version, artifact = SERVER_VERSION, WINDOWS if bundled_node else SERVER
                 if current is None or version_tuple(version) > version_tuple(current):
                     return install_release(storage, "server-" + version + suffix, artifact,
                                            "server.js", bundled_node)

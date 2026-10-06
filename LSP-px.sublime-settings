@@ -17,6 +17,8 @@
         "locLanguage": "english",
         "completionMode": "minimal",
         "hoverDetail": "standard",
+        // DDS hover background: checkerboard, dark, light or #RRGGBB (px-lsp 0.3.5+).
+        "texturePreviewBackground": "checkerboard",
         "scopeInlayHints": false,
         "indexAssets": true,
         "calendar": null,

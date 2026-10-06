@@ -46,6 +46,21 @@ def wait_for(predicate, callback, remaining=120):
         check('wait timeout', False)
 
 
+def wait_for_symbol(name, callback, remaining=120):
+    # A ready status may arrive before a queued rebuild starts. Wait for the
+    # actual fixture symbol needed by the next operation, with a fixed deadline.
+    session = module.instance(window).weaksession()
+    def received(rows):
+        if any(row['name'] == name for row in rows):
+            sublime.set_timeout(protect(lambda: callback(rows)))
+        elif remaining:
+            sublime.set_timeout(protect(lambda: wait_for_symbol(name, callback, remaining - 1)), 500)
+        else:
+            check('index contains ' + name, False, rows)
+    session.send_request_async(module.Request('workspace/symbol', {'query': name}), protect(received),
+                               protect(lambda error: check('workspace/symbol', False, error)))
+
+
 check('LSP imports', module.HAS_LSP)
 window.set_project_data({'folders': [{'path': str(fixture)}], 'settings': {'LSP': {'LSP-px': {
     'px': {'server_command': [local['node'], local['server'], '--stdio'], 'tiger_path': local.get('tiger')},
@@ -84,8 +99,7 @@ def connected():
             check(method, bool(value), str(value)[:300])
             sublime.set_timeout_async(protect(lambda: step(index+1)))
         session.send_request_async(module.Request(method, payload, event), protect(done), protect(lambda err: check(method, False, err)))
-    # Wait for full indexing so vocabulary-backed completions are meaningful.
-    wait_for(lambda: obj.health.get('indexing') is False, lambda: sublime.set_timeout_async(protect(step)))
+    wait_for_symbol('px_test_trait', lambda rows: sublime.set_timeout_async(protect(step)))
 
 
 def writers():
@@ -199,12 +213,7 @@ def finish():
     playset.write_text(json.dumps({'parents': [str(parent)]}), encoding='utf-8')
     def restarted():
         check('playset restarts while report focused', module.instance(window) is not old)
-        def symbols_ready():
-            session = module.instance(window).weaksession()
-            session.send_request_async(module.Request('workspace/symbol', {'query': symbol}),
-                lambda rows: module.ui.on_main(lambda: verify_parent(rows)))
-        wait_for(lambda: module.instance(window).health.get('definitions', 0) > 0 and
-                 not module.instance(window).health.get('indexing', True), symbols_ready)
+        wait_for_symbol(symbol, verify_parent)
     def verify_parent(rows):
         check('restarted server indexes added parent', any(row['name'] == symbol for row in rows), rows)
         current = module.instance(window)

@@ -1,7 +1,30 @@
 {
     "name": "Paradox",
-    "extends": "Mariana.sublime-color-scheme",
+    "variables": {
+        "background": "#303841"
+    },
+    "globals": {
+        "background": "var(background)",
+        "foreground": "#D8DEE9",
+        "caret": "#F0BA79",
+        "line_highlight": "#394450",
+        "selection": "#4B5868",
+        "selection_foreground": "#FFFFFF",
+        "inactive_selection": "#3D4855",
+        "gutter": "var(background)",
+        "gutter_foreground": "#929BA8",
+        "find_highlight": "#E5C890",
+        "find_highlight_foreground": "#17161A",
+        "accent": "#85C1DC"
+    },
     "rules": [
+        {"scope": "comment", "foreground": "#929BA8", "font_style": "italic"},
+        {"scope": "string", "foreground": "#A6D189"},
+        {"scope": "constant.numeric, constant.language", "foreground": "#F0BA79"},
+        {"scope": "keyword, storage", "foreground": "#E78284"},
+        {"scope": "entity.name, support.function", "foreground": "#85C1DC"},
+        {"scope": "variable", "foreground": "#99D1DB"},
+        {"scope": "invalid", "foreground": "#FFFFFF", "background": "#9C3848"},
         {"scope": "meta.semantic-token", "background": "var(background)"},
         {"scope": "meta.semantic-token.method", "foreground": "#F0BA79"},
         {"scope": "meta.semantic-token.function", "foreground": "#A6D189"},

@@ -12,12 +12,14 @@ import re
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
-SERVER_VERSION = "0.3.4"
-PACKAGE_VERSION = "0.1.0"
+SERVER_VERSION = "0.3.8"
+MIN_SERVER_VERSION = "0.3.4"
+PACKAGE_VERSION = "0.1.0-rc.3"
 SETTINGS = {
     "gameId": "ck3", "gamePath": None, "logsPath": None, "modPath": None,
     "parentPaths": [], "workspaceMods": [], "locLanguage": "english",
     "completionMode": "minimal", "hoverDetail": "standard",
+    "texturePreviewBackground": "checkerboard",
     "scopeInlayHints": False, "indexAssets": True, "calendar": None,
     "diagnosticsIgnore": [], "diagnosticsIgnorePatterns": [],
     "diagnosticsVanilla": False, "tracePerf": False,
@@ -78,6 +80,11 @@ def resolve_settings(raw, folders=(), active_file=None, excluded=()):
         raise ValueError("completionMode must be minimal, examples or names")
     if result["hoverDetail"] not in ("compact", "standard", "full"):
         raise ValueError("hoverDetail must be compact, standard or full")
+    background = result["texturePreviewBackground"]
+    if not isinstance(background, str) or (background not in ("checkerboard", "dark", "light")
+            and not re.fullmatch(r"#[0-9a-fA-F]{6}", background)):
+        raise ValueError("texturePreviewBackground must be checkerboard, dark, light or #RRGGBB")
+    result["texturePreviewBackground"] = background.lower()
     if not isinstance(result["locLanguage"], str) or not re.fullmatch(r"[a-z_]+", result["locLanguage"]):
         raise ValueError("locLanguage must be a lowercase language identifier")
     for key in ("scopeInlayHints", "indexAssets", "diagnosticsVanilla", "tracePerf"):

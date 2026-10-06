@@ -104,7 +104,8 @@ def main():
         return value
     try:
         init = check('initialize', {'processId': None, 'rootUri': root.as_uri(), 'workspaceFolders': [{'uri': root.as_uri(), 'name': root.name}],
-            'capabilities': {'textDocument': {'completion': {'completionItem': {'snippetSupport': True}}}},
+            'capabilities': {'workspace': {'workspaceEdit': {'documentChanges': True}},
+                             'textDocument': {'completion': {'completionItem': {'snippetSupport': True}}}},
             'initializationOptions': {'settings': settings, 'storageDir': str(storage), 'client': {'ownFileWatcher': True, 'hoverHtml': False, 'hoverIcons': False, 'fileLinks': False, 'commands': []}}})
         assert init['serverInfo']['version'] == args.expected_version, init['serverInfo']
         client.send('initialized', {})
@@ -154,7 +155,30 @@ def main():
         ]:
             check(method, params)
         assert results['textDocument/definition']['result'], 'Definition must resolve fixture trait'
-        assert results['textDocument/rename']['result'].get('changes'), 'Rename must return workspace edits'
+        rename = results['textDocument/rename']['result']
+        assert rename.get('changes') or rename.get('documentChanges'), 'Rename must return workspace edits'
+        if tuple(map(int, args.expected_version.split('.'))) >= (0, 3, 6):
+            def verify_rename(edit, version, source):
+                changes = edit['documentChanges']
+                expected = {event.resolve(): (version, source),
+                            (root / 'common/traits/px_traits.txt').resolve(): (None, (root / 'common/traits/px_traits.txt').read_text())}
+                assert {Path(core.uri_path(change['textDocument']['uri'])).resolve() for change in changes} == set(expected), edit
+                for change in changes:
+                    expected_version, content = expected[Path(core.uri_path(change['textDocument']['uri'])).resolve()]
+                    assert change['textDocument']['version'] == expected_version, change
+                    assert change['edits'], change
+                    for item in change['edits']:
+                        start = core.point_at(content, item['range']['start'])
+                        end = core.point_at(content, item['range']['end'])
+                        assert content[start:end] == 'px_test_trait', item
+                        assert item['newText'] == 'px_test_trait_renamed', item
+            verify_rename(rename, 1, text)
+            unsaved = '# Unsaved buffer shifts every edit range.\n' + text
+            client.send('textDocument/didChange', {'textDocument': dict(doc, version=2), 'contentChanges': [{'text': unsaved}]})
+            changed_rename = check('textDocument/rename', {'textDocument': doc,
+                'position': core.position(unsaved, unsaved.index('px_test_trait') + 3), 'newName': 'px_test_trait_renamed'})
+            verify_rename(changed_rename, 2, unsaved)
+            client.send('textDocument/didChange', {'textDocument': dict(doc, version=3), 'contentChanges': [{'text': text}]})
         wiki = results['paradox/exampleWiki']['result']
         entry = next(e for e in wiki['entries'] if e['name'] == 'add_trait')
         check('paradox/exampleWikiEntry', {'name': entry['name'], 'kind': entry['kind']})
@@ -174,7 +198,7 @@ def main():
         client.send('paradox/configChanged', settings)
         check('paradox/indexStats', None)
         client.notifications.clear()
-        client.send('textDocument/didChange', {'textDocument': dict(doc, version=2), 'contentChanges': [{'text': 'px_broken = {\n'}]})
+        client.send('textDocument/didChange', {'textDocument': dict(doc, version=4), 'contentChanges': [{'text': 'px_broken = {\n'}]})
         for _ in range(30):
             time.sleep(.1)
             client.request('paradox/indexStats', None)

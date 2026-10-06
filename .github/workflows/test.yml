@@ -4,6 +4,8 @@ permissions:
   contents: read
 jobs:
   core-and-protocol:
+    env:
+      GH_TOKEN: ${{ github.token }}
     strategy:
       fail-fast: false
       matrix:

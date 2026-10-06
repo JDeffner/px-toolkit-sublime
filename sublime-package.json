@@ -80,6 +80,11 @@
                     "full"
                   ]
                 },
+                "texturePreviewBackground": {
+                  "type": "string",
+                  "default": "checkerboard",
+                  "pattern": "^(checkerboard|dark|light|#[0-9a-fA-F]{6})$"
+                },
                 "scopeInlayHints": {
                   "type": "boolean",
                   "default": false

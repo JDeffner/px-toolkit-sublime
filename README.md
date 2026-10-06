@@ -1,27 +1,29 @@
+<img src=".github/assets/px-st-icon.svg" alt="PX ST icon" width="96" height="96">
+
 # LSP-px
 
 CK3 modding in Sublime Text 4, powered by [Paradox Language Server](https://github.com/JDeffner/paradox-modding-toolkit) and the [Sublime LSP client](https://lsp.sublimetext.io/).
 
 [User documentation](https://github.com/JDeffner/px-toolkit-sublime/wiki) covers installation, projects, settings, authoring, and troubleshooting.
 
-[Contributing](CONTRIBUTING.md) · [Support](SUPPORT.md) · [Security reporting](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md)
+[Contributing](CONTRIBUTING.md) | [Support](SUPPORT.md) | [Security reporting](SECURITY.md) | [Code of Conduct](CODE_OF_CONDUCT.md)
 
 This repository contains the native package. Event graphs, dynasty data and GUI layouts are presented as searchable lists and readable reports. An external graphical designer is outside this release.
 
 ## Maintenance and project takeover
 
-I don't use Sublime Text regularly, so anyone interested is welcome to take over this project's maintenance. I'll still try to fix issues when I have time, but the [main Paradox Modding Toolkit](https://github.com/JDeffner/paradox-modding-toolkit) will always be my priority. If you'd like to take over, please [open an issue](https://github.com/JDeffner/px-toolkit-sublime/issues) so we can arrange the handover.
+I do not plan much further development of this Sublime Text package. My focus is the [main Paradox Modding Toolkit](https://github.com/JDeffner/paradox-modding-toolkit). I may fix bugs when time allows, but there is no planned feature or release schedule. Contributions are welcome. If you want to maintain this package, please [open an issue](https://github.com/JDeffner/px-toolkit-sublime/issues) to arrange a handover.
 
 ## Install and set up
 
 1. Install **LSP** through Package Control. Use LSP **2.13 or newer** and Sublime Text **build 4200 or newer**. Restart Sublime if LSP was installed after this package.
-2. Until a public Package Control listing exists, build with `python scripts/build_package.py` and copy `dist/LSP-px.sublime-package` into Sublime's **Installed Packages** directory. Use Preferences → Browse Packages to locate the adjacent directory. For development, clone into `Packages/LSP-px`; that exact package name is required. Do not install both forms.
+2. Download `LSP-px.sublime-package` from the [GitHub release](https://github.com/JDeffner/px-toolkit-sublime/releases/tag/v0.1.0-rc.3) and copy it into Sublime's **Installed Packages** directory. Use Preferences > Browse Packages to locate the adjacent directory. For development, clone into `Packages/LSP-px`; that exact package name is required. Do not install both forms.
 3. Run **Paradox: Setup** from the command palette. Detect or set your CK3 `game/` folder and, optionally, the logs folder containing generated script documentation.
 4. Open your mod folder, containing `descriptor.mod`, and open a script under `common/` or `events/`. The server downloads on first use, then indexes in the background. The status bar shows when it is ready.
 5. Optionally run **Paradox: Enable Semantic Highlighting** and choose the **Paradox** color scheme. This toggle affects all LSP servers. Inlay hints are enabled for the CK3 window; use LSP's inlay-hint toggle to hide them.
 6. Run **Paradox: Install Tiger**, save your changes, then **Paradox: Run Tiger Validation** for deep CK3 checks. This is separate from the LSP's lightweight diagnostics.
 
-The managed server checks the upstream GitHub release on each startup or restart and installs newer stable px-lsp versions automatically. It verifies downloads against the release asset's SHA-256 digest and extracts each version into its own directory under `Package Storage/LSP-px`. Running sessions keep their current server until restarted. Offline, rate-limited, or failed updates keep the newest complete cached installation. A first install falls back to the pinned **px-lsp 0.3.4** bootstrap from toolkit **v0.4.3** if release discovery fails. Set `px.auto_update_server` to `false` to keep the cached version without update checks; with no cache, this installs the bootstrap version. Syntax grammars and descriptor metadata update with the Sublime package, separately from the server.
+This candidate uses **px-lsp 0.3.8** from the **toolkit v0.5.5 prerelease** as its tested baseline. Automatic updates choose this baseline or a newer stable server at startup or restart; the older stable release does not replace it. Other future prereleases are not selected automatically. Downloads are checked against SHA-256 hashes and kept in separate version directories under `Package Storage/LSP-px`. Running sessions keep their server until restarted. Offline, rate-limited, or failed updates retain the newest complete cached installation. With no cache, the package downloads the baseline. Set `px.auto_update_server` to `false` to keep the cached version without update checks; with no cache, this still installs the baseline. An explicit version pin takes priority. Syntax grammars and descriptor metadata update with the Sublime package, separately from the server.
 
 Node.js 18+ is the runtime minimum; use a maintained Node release. Windows x64 can download and update the upstream bundled runtime with the server when Node is absent. Linux/macOS need an installed Node runtime. Set `px.node_path` if Sublime cannot find it.
 
@@ -35,7 +37,7 @@ The LSP supplies context completion and snippets, hover documentation, signature
 
 Script, localization, GUI, descriptor, info and embedded datafunction grammars come from the matching upstream release. Syntax detection is restricted to recognized files in configured game/mod/dependency roots. Unrelated `.txt` and YAML files keep their syntax. Explicit syntax selections are respected; **Use Paradox Syntax** provides an override. The `_*.info` grammar does not imply script-provider parity.
 
-Use standard **LSP:** commands for navigation, rename, formatting, references and code actions. All extra commands are under **Paradox:** and Tools → Paradox Modding:
+Use standard **LSP:** commands for navigation, rename, formatting, references and code actions. All extra commands are under **Paradox:** and Tools > Paradox Modding:
 
 | Area | Native tools |
 | --- | --- |
@@ -54,7 +56,7 @@ Project-level reports refresh after debounced index changes. Cursor and GUI snap
 
 ## Settings
 
-Open Preferences → Package Settings → LSP-px → Settings. Server settings live under `settings`; adapter settings live under `px`. Project overrides belong under `settings.LSP.LSP-px` in your `.sublime-project`:
+Open Preferences > Package Settings > LSP-px > Settings. Server settings live under `settings`; adapter settings live under `px`. Project overrides belong under `settings.LSP.LSP-px` in your `.sublime-project`:
 
 ```json
 {
@@ -88,6 +90,7 @@ Project values override global values; defaults fill omitted server fields. Rela
 | `locLanguage` | `"english"`; reference/display language |
 | `completionMode` | `"minimal"`, `"examples"`, `"names"` |
 | `hoverDetail` | `"compact"`, `"standard"` (default), `"full"` |
+| `texturePreviewBackground` | `"checkerboard"` (default), `"dark"`, `"light"`, or `"#RRGGBB"`; DDS hover background, requires px-lsp 0.3.5+ |
 | `scopeInlayHints` | `false`; inferred scope annotations |
 | `indexAssets` | `true`; graphics definition/reference indexing |
 | `calendar` | `null`, or `{ "epoch": 1, "after": "AD", "before": "BC" }`; optional twelve `months` names |
@@ -96,7 +99,7 @@ Project values override global values; defaults fill omitted server fields. Rela
 | `diagnosticsVanilla` | `false`; diagnostics on opened vanilla files |
 | `tracePerf` | `false`; server timing logs |
 
-All sixteen are forwarded as a complete resolved object through the server's custom configuration notification. Path, language and asset changes rebuild the index. Completion/hover/diagnostic preferences update live. Mod-local `.px-toolkit/calendar.json` takes precedence over calendar settings. Playsets require a JSON object whose `parents` value is an array of nonempty path strings. Invalid playsets are rejected before replacing a running watcher or restarting the session. Playset/schema changes restart the server even when an HTML report has focus; the package owns a cancellable polling watcher for external mod/dependency creates, edits and deletes. Vanilla is not polled. Increase `px.watch_interval_seconds` for a large dependency tree; it must be a finite number of at least 1.
+All seventeen settings are forwarded as a complete resolved object through the server's custom configuration notification. Path, language and asset changes rebuild the index. Completion/hover/diagnostic preferences update live. Mod-local `.px-toolkit/calendar.json` takes precedence over calendar settings. Playsets require a JSON object whose `parents` value is an array of nonempty path strings. Invalid playsets are rejected before replacing a running watcher or restarting the session. Playset/schema changes restart the server even when an HTML report has focus; the package owns a cancellable polling watcher for external mod/dependency creates, edits and deletes. Vanilla is not polled. Increase `px.watch_interval_seconds` for a large dependency tree; it must be a finite number of at least 1.
 
 | Adapter setting | Meaning |
 | --- | --- |
@@ -104,7 +107,7 @@ All sixteen are forwarded as a complete resolved object through the server's cus
 | `auto_update_server` | Default `true`: check for newer stable servers on startup/restart; `false` keeps the newest cached version |
 | `server_version` | Default `null`: follow `auto_update_server`; an exact version such as `"0.3.4"` pins that server, including an older cached version |
 | `node_path` | Explicit Node executable |
-| `heap_mb` | `null`: upstream policy, half RAM bounded to 2048–4096 MiB; explicit range 512–32768 |
+| `heap_mb` | `null`: upstream policy, half RAM bounded to 2048-4096 MiB; explicit range 512-32768 |
 | `storage_dir` | Override server cache directory |
 | `data_dir` | Override parent of the server's `ck3/` data directory |
 | `detect_syntax` | Automatic scoped assignment, default true |
@@ -132,7 +135,7 @@ Tiger validates **saved files**. Unsaved files prevent a new run. A rejected rep
 - Formatting is the server's script document formatter. No range/on-type formatter, broad style controls, or equivalent GUI/localization formatter is added.
 - No call/type hierarchy, implementation/declaration/type-definition provider, semantic selection ranges, document highlights, document-link provider, code lenses, file-rename reference updates, or general refactoring provider exists in the bootstrap server. Later server releases may add providers independently of this package.
 - GUI layouts and save values are static data. There is no native JavaScript/canvas designer, live game renderer, debugger, event execution, or runtime scope inspection. Ironman/binary saves remain unsupported.
-- Theme-banner/texture paths are navigable. This package does not add DDS conversion, a graphical dynasty/event canvas, a coat-of-arms editor, Workshop publishing, or an arbitrary color picker. DDS image hover rendering still needs a visual acceptance check.
+- Theme-banner/texture paths are navigable. This package does not add DDS conversion, a graphical dynasty/event canvas, a coat-of-arms editor, Workshop publishing, or an arbitrary color picker. DDS image hovers, including transparency, were checked in Sublime Text 4200 on Windows.
 - Signature help, completion richness and localization resolution depend on the server's knowledge and the loaded game/mod context. Missing game/log paths reduce available information.
 
 ## Troubleshooting and development

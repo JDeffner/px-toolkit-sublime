@@ -39,7 +39,7 @@ def archive(version, bundled=False, runtime=True):
     return output.getvalue()
 
 
-def release(version='0.3.5', bundled=False, runtime=True):
+def release(version='0.3.9', bundled=False, runtime=True):
     content = archive(version, bundled, runtime)
     name = ('px-lsp-win-x64-' + version + '.zip' if bundled
             else 'px-lsp-server-' + version + '.tar.gz')
@@ -83,7 +83,7 @@ class ManagedUpdateTest(unittest.TestCase):
             command = install.server_command(self.storage, self.options)
         self.assertEqual(command[:2], ['/node', '--max-old-space-size=1024'])
         self.assertEqual(command[-1], '--stdio')
-        self.assertEqual(Path(command[-2]).read_text(), '0.3.5')
+        self.assertEqual(Path(command[-2]).read_text(), '0.3.9')
         self.assertEqual(len(calls), 2)
         self.assertFalse((self.storage / 'server-0.3.4').exists())
 
@@ -95,7 +95,7 @@ class ManagedUpdateTest(unittest.TestCase):
             updated = install.server_command(self.storage, self.options)
             restarted = install.server_command(self.storage, self.options)
         self.assertEqual(old.read_text(), '0.3.4')
-        self.assertEqual(Path(updated[-2]).read_text(), '0.3.5')
+        self.assertEqual(Path(updated[-2]).read_text(), '0.3.9')
         self.assertEqual(updated, restarted)
         self.assertEqual(calls.count(install.RELEASES), 2)
         self.assertEqual(len(calls), 3)
@@ -131,7 +131,7 @@ class ManagedUpdateTest(unittest.TestCase):
             command = install.server_command(self.storage, self.options)
         self.assertEqual(Path(command[-2]), old)
         self.assertEqual(old.read_text(), '0.3.4')
-        self.assertFalse((self.storage / 'server-0.3.5').exists())
+        self.assertFalse((self.storage / 'server-0.3.9').exists())
         self.assertEqual(list(self.storage.glob('.install-*')), [])
 
     def test_invalid_metadata_keeps_cache(self):
@@ -161,7 +161,7 @@ class ManagedUpdateTest(unittest.TestCase):
 
     def test_opt_out_keeps_newest_cache_without_network(self):
         self.seed()
-        newest = self.seed('0.3.5')
+        newest = self.seed('0.3.9')
         with patch.object(install.urllib.request, 'urlopen', side_effect=AssertionError('unexpected network')):
             command = install.server_command(self.storage, dict(self.options, auto_update_server=False))
         self.assertEqual(Path(command[-2]), newest)
@@ -174,7 +174,7 @@ class ManagedUpdateTest(unittest.TestCase):
 
     def test_old_remote_release_does_not_downgrade(self):
         newest = self.seed('0.3.10')
-        metadata, content = release('0.3.5')
+        metadata, content = release('0.3.9')
         calls = []
         with patch.object(install.urllib.request, 'urlopen', side_effect=self.response(metadata, content, calls)):
             command = install.server_command(self.storage, self.options)
@@ -182,7 +182,7 @@ class ManagedUpdateTest(unittest.TestCase):
         self.assertEqual(calls, [install.RELEASES])
 
     def test_bootstrap_install_when_discovery_fails_or_updates_disabled(self):
-        metadata, content = release('0.3.4')
+        metadata, content = release(install.SERVER_VERSION)
         asset = metadata['assets'][0]
         def response(request, timeout):
             if request.full_url == install.RELEASES:
@@ -193,8 +193,49 @@ class ManagedUpdateTest(unittest.TestCase):
             with self.assertLogs(install.__name__, level='WARNING'):
                 command = install.server_command(self.storage / 'automatic', self.options)
             disabled = install.server_command(self.storage / 'disabled', dict(self.options, auto_update_server=False))
-        self.assertEqual(Path(command[-2]).read_text(), '0.3.4')
-        self.assertEqual(Path(disabled[-2]).read_text(), '0.3.4')
+        self.assertEqual(Path(command[-2]).read_text(), install.SERVER_VERSION)
+        self.assertEqual(Path(disabled[-2]).read_text(), install.SERVER_VERSION)
+
+    def test_tested_prerelease_baseline_wins_over_older_stable(self):
+        for bundled in (False, True):
+            for with_cache in (False, True):
+                with self.subTest(bundled=bundled, with_cache=with_cache):
+                    storage = self.storage / ('win' if bundled else 'node') / str(with_cache)
+                    if with_cache:
+                        metadata, content = release('0.3.4', bundled)
+                        asset = metadata['assets'][0]
+                        with patch.object(install.urllib.request, 'urlopen', return_value=io.BytesIO(content)):
+                            old = install.install_release(storage, 'server-0.3.4' + ('-win' if bundled else ''),
+                                (asset['browser_download_url'], asset['digest'][7:]), 'server.js', bundled)
+                    baseline, content = release(install.SERVER_VERSION, bundled)
+                    asset = baseline['assets'][0]
+                    stable, _ = release('0.3.6', bundled)
+                    calls = []
+                    def response(request, timeout):
+                        calls.append(request.full_url)
+                        if request.full_url == install.RELEASES:
+                            return io.BytesIO(json.dumps(stable).encode())
+                        self.assertEqual(request.full_url, asset['browser_download_url'])
+                        return io.BytesIO(content)
+                    with patch.object(install, 'WINDOWS' if bundled else 'SERVER',
+                                      (asset['browser_download_url'], asset['digest'][7:])), \
+                            patch.object(install.urllib.request, 'urlopen', side_effect=response):
+                        selected = install.managed_server(storage, bundled_node=bundled)
+                    self.assertEqual(selected.read_text(), install.SERVER_VERSION)
+                    self.assertEqual(len(calls), 2)
+                    if with_cache:
+                        self.assertEqual(old.read_text(), '0.3.4')
+
+    def test_explicit_baseline_pin_does_not_require_stable_release_listing(self):
+        metadata, content = release(install.SERVER_VERSION)
+        asset = metadata['assets'][0]
+        def response(request, timeout):
+            self.assertEqual(request.full_url, asset['browser_download_url'])
+            return io.BytesIO(content)
+        with patch.object(install, 'SERVER', (asset['browser_download_url'], asset['digest'][7:])), \
+                patch.object(install.urllib.request, 'urlopen', side_effect=response):
+            command = install.server_command(self.storage, dict(self.options, server_version=install.SERVER_VERSION))
+        self.assertEqual(Path(command[-2]).read_text(), install.SERVER_VERSION)
 
     def test_windows_updates_bundled_runtime_together_with_server(self):
         old = self.seed(bundled=True)
@@ -204,9 +245,9 @@ class ManagedUpdateTest(unittest.TestCase):
                 patch.object(install.platform, 'machine', return_value='AMD64'), \
                 patch.object(install.urllib.request, 'urlopen', side_effect=self.response(metadata, content, [])):
             command = install.server_command(self.storage, self.options)
-        self.assertIn('server-0.3.5-win', command[0])
+        self.assertIn('server-0.3.9-win', command[0])
         self.assertTrue(Path(command[0]).is_file())
-        self.assertEqual(Path(command[-2]).read_text(), '0.3.5')
+        self.assertEqual(Path(command[-2]).read_text(), '0.3.9')
         self.assertEqual(old.read_text(), '0.3.4')
 
     def test_missing_bundled_runtime_keeps_previous_install(self):
@@ -215,7 +256,7 @@ class ManagedUpdateTest(unittest.TestCase):
         with self.assertLogs(install.__name__, level='WARNING'), \
                 patch.object(install.urllib.request, 'urlopen', side_effect=self.response(metadata, content, [])):
             self.assertEqual(install.managed_server(self.storage, bundled_node=True), old)
-        self.assertFalse((self.storage / 'server-0.3.5-win').exists())
+        self.assertFalse((self.storage / 'server-0.3.9-win').exists())
 
     def test_partial_or_unsafe_cache_is_not_selected(self):
         old = self.seed()
@@ -233,7 +274,7 @@ class ManagedUpdateTest(unittest.TestCase):
 
     def test_pinned_older_cache_wins_without_network(self):
         old = self.seed('0.3.4')
-        self.seed('0.3.5')
+        self.seed('0.3.9')
         with patch.object(install.urllib.request, 'urlopen', side_effect=AssertionError('unexpected network')):
             command = install.server_command(self.storage, dict(self.options, server_version='0.3.4'))
         self.assertEqual(Path(command[-2]), old)
@@ -266,7 +307,7 @@ class ManagedUpdateTest(unittest.TestCase):
 
     def test_pinned_windows_server_uses_matching_bundled_node(self):
         old = self.seed('0.3.4', bundled=True)
-        self.seed('0.3.5', bundled=True)
+        self.seed('0.3.9', bundled=True)
         with patch.object(install, 'node_path', return_value=None), \
                 patch.object(install.platform, 'system', return_value='Windows'), \
                 patch.object(install.platform, 'machine', return_value='AMD64'), \
@@ -282,12 +323,12 @@ class ManagedUpdateTest(unittest.TestCase):
         metadata, content = release()
         with patch.object(install.urllib.request, 'urlopen', side_effect=self.response(metadata, content, [])):
             command = install.server_command(self.storage, dict(pinned, server_version=None))
-        self.assertEqual(Path(command[-2]).read_text(), '0.3.5')
+        self.assertEqual(Path(command[-2]).read_text(), '0.3.9')
 
 
 class ReleaseMetadataTest(unittest.TestCase):
     def test_history_filters_and_deduplicates_supported_stable_versions(self):
-        latest, _ = release('0.3.5')
+        latest, _ = release('0.3.9')
         old, _ = release('0.3.4')
         unsupported, _ = release('0.3.3')
         prerelease, _ = release('0.4.0')
@@ -296,14 +337,14 @@ class ReleaseMetadataTest(unittest.TestCase):
         unhashed['assets'][0]['digest'] = None
         with patch.object(install, 'release_metadata', return_value=[latest, latest, old, unsupported, prerelease, unhashed]):
             versions = install.released_servers()
-        self.assertEqual(set(versions), {'0.3.4', '0.3.5'})
+        self.assertEqual(set(versions), {'0.3.4', '0.3.9'})
 
     def test_history_reads_older_pages_and_selects_platform_assets(self):
-        latest, _ = release('0.3.5', bundled=True)
+        latest, _ = release('0.3.9', bundled=True)
         old, _ = release('0.3.4', bundled=True)
         with patch.object(install, 'release_metadata', side_effect=[[latest] * 100, [old]]) as request:
             versions = install.released_servers(bundled_node=True)
-        self.assertEqual(set(versions), {'0.3.4', '0.3.5'})
+        self.assertEqual(set(versions), {'0.3.4', '0.3.9'})
         self.assertEqual(request.call_args_list[1][0][0], install.RELEASE_HISTORY + '?per_page=100&page=2')
         self.assertTrue(versions['0.3.4'][0].endswith('.zip'))
 

@@ -17,6 +17,6 @@ For bugs, include the package revision, OS, Sublime build, LSP/server versions, 
 
 ## Availability
 
-Joël does not regularly use Sublime Text. Anyone interested is welcome to take over the project. He will still try to fix issues when time allows, but the main Paradox Modding Toolkit will always be the priority. There is no guaranteed response time, release schedule, or long-term support for older versions.
+I do not plan much further development of this Sublime Text package. My focus is the [main Paradox Modding Toolkit](https://github.com/JDeffner/paradox-modding-toolkit). I may fix bugs when time allows, but there is no planned feature or release schedule. Contributions are welcome. If you want to maintain this package, please [open an issue](https://github.com/JDeffner/px-toolkit-sublime/issues) to arrange a handover.
 
 The package remains a release candidate until its acceptance checks are complete. Tests and static reports do not guarantee in-game behavior. See the [validation record](docs/VALIDATION.md) for performed checks and limitations.

@@ -2,6 +2,39 @@
 
 This file distinguishes performed checks from configured or outstanding checks.
 
+## Current candidate, 6 October 2026
+
+The 0.1.0-rc.3 candidate uses px-lsp 0.3.8 and the script grammar from toolkit v0.5.5, an upstream prerelease at commit `4a3e210a74d40af91907f52753dd118f8fe8c3ea`. Older supported server pins still start at 0.3.4. This is local prerelease evidence; it does not replace final-commit CI.
+
+| Check | Result |
+| --- | --- |
+| Standalone Python 3.14 | 61 passed; 23 native tests skipped |
+| Native Sublime 4200 / Python 3.8.12 | All 84 tests passed, including scheme colors and adjacent-pane source opening |
+| Real stdio | Baseline 0.3.8, managed automatic selection, and minimum supported 0.3.4 passed |
+| Rename | Versioned edits checked against saved and unsaved text on 0.3.8, including document versions, ranges, and symbol-kind boundaries |
+| Live editor with installed CK3 | All 26 workflow checks passed on LSP 0.3.8, using the Windows bundle's Node 24.18.1 |
+| Tiger 1.19.0 | Invalid property, fix, diagnostic clear, and cancellation passed |
+| Fresh managed install | Empty server cache selected and downloaded verified 0.3.8, despite GitHub's older stable 0.3.6 release |
+| Offline restart | Retained the verified 0.3.8 installation |
+| Visual checks | DDS image and checkerboard transparency, RGB/HSV swatches, native conversion picker and undo, localization, constant and scope hints passed in the real editor |
+| Release archives | Server-only and Windows bundle hashes verified against the v0.5.5 asset metadata |
+
+The live checks include completion, hover, definitions, semantic tokens, snippets, source edits and undo, stale-write rejection, localization BOM and Unicode, GUI edits, definition creation, and dependency-triggered and manual restarts from an HTML report. The editor harness now waits for the expected indexed symbol before dependent checks. A status notification alone was insufficient during a queued rebuild.
+
+The Paradox scheme now defines its own globals and syntax rules. The earlier `extends` field did not supply a usable base scheme. The development installer now replaces a complete package archive atomically; copying over an open archive caused temporary syntax and color-scheme loading errors during testing. Close the isolated editor before installing on Windows, where the open archive can be locked. After a fresh editor start, all package resources loaded and the native tests passed.
+
+The final package is built twice and checked for equal SHA-256 hashes. `dist/SHA256SUMS` identifies the resulting artifact. Archive inspection includes the README icon and excludes development profiles, tests, screenshots, reports, downloaded servers, and executables.
+
+### Publication checks
+
+The release procedure requires all six platform jobs to pass on the tagged revision. See [Package checks](https://github.com/JDeffner/px-toolkit-sublime/actions/workflows/test.yml) for the revision-specific result. Local Windows evidence does not establish Linux or macOS acceptance. The CI protocol runner now authenticates GitHub API metadata requests with the job token to avoid the shared unauthenticated rate limit that affected the previous macOS run. The token is not sent to release-asset downloads.
+
+This version uses a prerelease tag because its upstream 0.5.5 baseline is a prerelease. Package Control acceptance is separate from GitHub publication. No new in-game or large total-conversion performance claim is made.
+
+## Historical validation
+
+The dated records below describe earlier candidates and retain their original versions and test counts.
+
 ## Local environment
 
 - Windows x64, Sublime Text build 4200, its embedded Python 3.8.12.
@@ -17,7 +50,7 @@ This file distinguishes performed checks from configured or outstanding checks.
 - Real stdio protocol smoke against the release: initialization/version, standard editing/navigation/symbol/token/format requests, native custom read requests, GUI and definition source edits, live configuration notification, shutdown and process exit. The runner waits for the full index, not merely the first mod definitions.
 - Real Sublime integration: package load, scoped syntax, one registered session, correct resolved roots/settings, completion, hover, definition, semantic tokens, snippet catalog, buffer edit/undo, stale-edit refusal, localization BOM saved bytes and Unicode, GUI server edit and undo, HTML report creation.
 - Real Tiger output parsing with CK3 installed; file-level warnings with null positions exposed a bug, now fixed with a regression test.
-- Real Tiger invalid-property → fix → diagnostic-clear cycle and cancellation passed through package commands.
+- Real Tiger invalid-property > fix > diagnostic-clear cycle and cancellation passed through package commands.
 - Guided definition creation inserted the chosen identifier using a server-generated template.
 - Managed cold installation inside Sublime passed. The verified Windows runtime fallback downloaded and ran Node successfully. Manual and managed server sessions both reached a healthy state.
 - Cached server reuse passed with the downloader replaced by a test function that fails on any download attempt.
@@ -49,7 +82,7 @@ For local Windows editor integration:
 1. `python scripts/setup_sublime_test.py` copies an installed Sublime into `.dev/sublime`.
 2. Build with `--install ".dev/sublime/Data/Installed Packages"`.
 3. Start the portable executable; wait for the harness to install LSP and its libraries. Restart the portable instance after dependencies finish installing. The harness records bootstrap results under `Data/`.
-4. `scripts/protocol_smoke.py` creates `.dev/fixture mod ü`. Its fixture includes intentionally incomplete game content suitable for navigation and diagnostics tests.
+4. `scripts/protocol_smoke.py` creates `.dev/fixture mod Ã¼`. Its fixture includes intentionally incomplete game content suitable for navigation and diagnostics tests.
 5. Create portable `Data/editor-config.json` with absolute `node`, `server`, `game`, and optional `tiger` paths. Copy `scripts/editor_integration.py` to portable `Data/integration.py`; run portable `subl.exe --command px_test_run`. Inspect `Data/editor.json` for `complete: true` and no failures.
 
 The test harness and scripts are excluded from the public `.sublime-package`. Do not install the harness into a normal profile. CI uses the separate UnitTesting tests in `tests/test_editor.py` and requires no CK3 game assets.

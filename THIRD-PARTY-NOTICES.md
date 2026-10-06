@@ -2,11 +2,11 @@
 
 ## Paradox Modding Toolkit
 
-Syntax grammars, the descriptor field/tag data and `vendor/descriptorMod.ts` originate from [JDeffner/paradox-modding-toolkit](https://github.com/JDeffner/paradox-modding-toolkit), tag v0.4.3, commit `f517501e0edb83fb0473a5db1c2a9c42afb06886`, GPL-3.0-or-later. The grammars are converted from JSON TextMate syntax to XML plist without changing their scope/rule content. Descriptor metadata is generated from the included TypeScript source. The original GPLv3 text is included as `LICENSE`; the package's GPL-3.0-or-later grant is in `COPYRIGHT`.
+Syntax grammars, the descriptor field/tag data and `vendor/descriptorMod.ts` originate from [JDeffner/paradox-modding-toolkit](https://github.com/JDeffner/paradox-modding-toolkit), prerelease tag v0.5.5, commit `4a3e210a74d40af91907f52753dd118f8fe8c3ea`, GPL-3.0-or-later. The grammars are converted from JSON TextMate syntax to XML plist without changing their scope/rule content. Descriptor metadata is generated from the included TypeScript source. The original GPLv3 text is included as `LICENSE`; the package's GPL-3.0-or-later grant is in `COPYRIGHT`.
 
 Regenerate against an exact matching sibling checkout using `python scripts/vendor_upstream.py ../paradox-modding-toolkit`, then `pnpm dlx esbuild@0.25.12 vendor/descriptorMod.ts --bundle --platform=node --outfile=.dev/descriptor.cjs` and `node scripts/export_descriptor.cjs`. On Windows use `pnpm.cmd` where execution policy blocks the PowerShell shim.
 
-The managed px-lsp server is downloaded separately from the latest stable [upstream release](https://github.com/JDeffner/paradox-modding-toolkit/releases/latest), with [v0.4.3](https://github.com/JDeffner/paradox-modding-toolkit/tree/v0.4.3) as the bootstrap fallback. Its source, data provenance and third-party licenses remain upstream; the release directory layout is preserved. Each cached installation's `installed.json` records the verified archive hash; the directory name identifies the server version. The corresponding toolkit release provides its source.
+The managed px-lsp server is downloaded separately from the tested [v0.5.5 prerelease](https://github.com/JDeffner/paradox-modding-toolkit/tree/v0.5.5), or a newer stable [upstream release](https://github.com/JDeffner/paradox-modding-toolkit/releases/latest). Its source, data provenance and third-party licenses remain upstream; the release directory layout is preserved. Each cached installation's `installed.json` records the verified archive hash; the directory name identifies the server version. The corresponding toolkit release provides its source.
 
 ## Sublime LSP and Tiger
 

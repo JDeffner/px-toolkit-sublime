@@ -17,6 +17,7 @@ for key, value in SETTINGS.items():
 properties['gameId']['enum'] = ['ck3']
 properties['completionMode']['enum'] = ['minimal', 'examples', 'names']
 properties['hoverDetail']['enum'] = ['compact', 'standard', 'full']
+properties['texturePreviewBackground']['pattern'] = r'^(checkerboard|dark|light|#[0-9a-fA-F]{6})$'
 properties['locLanguage']['pattern'] = '^[a-z_]+$'
 properties['calendar'] = {'type': ['object', 'null'], 'required': ['epoch', 'after'], 'additionalProperties': False,
     'properties': {'epoch': {'type': 'integer'}, 'after': {'type': 'string'}, 'before': {'type': 'string'},

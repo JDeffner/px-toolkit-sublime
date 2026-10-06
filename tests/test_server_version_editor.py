@@ -101,8 +101,8 @@ class ServerVersionCommandTest(unittest.TestCase):
         self.patch(self.module.install, 'released_servers', side_effect=OSError('offline'))
         self.command.run()
         rows = self.pick.call_args[0][2]
-        self.assertEqual([row['version'] for row in rows], [None, '0.3.5', '0.3.4'])
-        self.assertIn('Cached', rows[1]['detail'])
+        self.assertEqual([row['version'] for row in rows], [None, self.module.core.SERVER_VERSION, '0.3.5'])
+        self.assertIn('Cached', rows[2]['detail'])
         self.prepare.assert_not_called()
         self.restart.assert_not_called()
         self.assertEqual(self.project_options(), {})

@@ -54,6 +54,34 @@ class EditorTest(unittest.TestCase):
         self.assertIsInstance(sheet, sublime.HtmlSheet)
         sheet.close()
 
+    def test_paradox_scheme_has_readable_background_and_semantic_colors(self):
+        self.view.settings().set('color_scheme', 'Packages/LSP-px/Paradox.sublime-color-scheme')
+        self.assertEqual(self.view.style()['background'].lower(), '#303841')
+        self.assertEqual(self.view.style()['foreground'].lower(), '#d8dee9')
+        self.assertEqual(self.view.style_for_scope('meta.semantic-token.function')['foreground'].lower(), '#a6d189')
+
+    def test_open_source_to_side_keeps_existing_view_and_opens_other_group(self):
+        window = self.view.window()
+        layout = window.get_layout()
+        clone = None
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'source.txt'
+            path.write_text('source = yes\n')
+            self.view.retarget(str(path))
+            try:
+                window.set_layout({'cols': [0, .5, 1], 'rows': [0, 1], 'cells': [[0, 0, 1, 1], [1, 0, 2, 1]]})
+                window.set_view_index(self.view, 0, 0)
+                window.focus_view(self.view)
+                clone = self.module.ui.open_source(window, str(path), side=True)
+                self.assertEqual(window.get_view_index(clone)[0], 1)
+                self.assertEqual(window.get_view_index(self.view)[0], 0)
+                self.assertEqual(clone.buffer_id(), self.view.buffer_id())
+                self.assertNotEqual(clone.id(), self.view.id())
+            finally:
+                if clone and clone.id() != self.view.id():
+                    clone.close()
+                window.set_layout(layout)
+
 
 @unittest.skipIf(sublime is None, 'requires Sublime Text')
 class AuditRegressionTest(unittest.TestCase):

@@ -273,7 +273,30 @@
 			<key>name</key>
 			<string>variable.other.saved-scope.paradox</string>
 			<key>match</key>
-			<string>\b(scope|var|local_var|global_var|flag|event_target|define|list|title|character|province|culture|faith|dynasty|house|religion|trait|vassal_contract|struggle|epidemic):[A-Za-z0-9_.\-]+\b</string>
+			<string>\b(?:(scope:)|((?:var|local_var|global_var|flag|event_target|define|list|title|character|province|culture|faith|dynasty|house|religion|trait|vassal_contract|struggle|epidemic):))([A-Za-z0-9_\-]+)((?:\.[A-Za-z0-9_\-]+)*)\b</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.control.saved-scope.paradox</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.control.reference.paradox</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>variable.other.reference.paradox</string>
+				</dict>
+				<key>4</key>
+				<dict>
+					<key>name</key>
+					<string>variable.language.scope.paradox</string>
+				</dict>
+			</dict>
 		</dict>
 		<key>scope-ref</key>
 		<dict>

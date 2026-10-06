@@ -9,8 +9,8 @@
 
 Package Control installs the package from the repository root and tracks tags; `sublime-package.json` contributes settings schemas, not ordinary-package dependency installation. Users must install LSP separately. Maintainer acceptance of a channel submission is external to this repository.
 
-Stable server releases update automatically from GitHub asset metadata. Run `python scripts/ci_protocol.py --latest` alongside the bootstrap protocol check. Changes to the bootstrap version must update URL/hash pins, protocol tests, version gates, notices and the compatibility table together. Keep a manual command override for development/offline use. Updating server code does not update the package's vendored grammars or descriptor metadata.
+This candidate uses px-lsp 0.3.8 from toolkit v0.5.5, which upstream marks as a prerelease. Publish this package as a prerelease while that baseline is under review. Automatic updates select the tested baseline or a newer stable server; future prereleases require an explicit package update. Run `python scripts/ci_protocol.py --latest` alongside the bootstrap protocol check. Changes to the bootstrap version must update URL/hash pins, protocol tests, version gates, notices and the compatibility table together. Keep a manual command override for development/offline use. Updating server code does not update the package's vendored grammars or descriptor metadata.
 
 | Package | Bootstrap server | Bootstrap toolkit | Sublime | LSP |
 | --- | --- | --- | --- | --- |
-| 0.1.0 candidate | 0.3.4 | v0.4.3 | >=4200 | >=2.13 |
+| 0.1.0 candidate | 0.3.8 | v0.5.5 (prerelease) | >=4200 | >=2.13 |

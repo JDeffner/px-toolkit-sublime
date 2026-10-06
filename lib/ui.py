@@ -73,7 +73,8 @@ def open_source(window, file, line=0, column=0, side=False, utf16=False):
         if window.num_groups() < 2:
             window.set_layout({"cols": [0.0, 0.5, 1.0], "rows": [0.0, 1.0], "cells": [[0, 0, 1, 1], [1, 0, 2, 1]]})
         group = (window.active_group() + 1) % window.num_groups()
-        view = window.open_file("{}:{}:{}".format(file, line + 1, column + 1), sublime.ENCODED_POSITION, group=group)
+        view = window.open_file("{}:{}:{}".format(file, line + 1, column + 1),
+                                sublime.ENCODED_POSITION | sublime.FORCE_GROUP, group=group)
     else:
         view = window.open_file("{}:{}:{}".format(file, line + 1, column + 1), sublime.ENCODED_POSITION)
     if utf16:

@@ -52,6 +52,15 @@ class WorkspaceTest(unittest.TestCase):
         self.assertFalse(core.under(str(self.root) + "_outside/file", str(self.root)))
         self.assertTrue(core.under(self.root / "events/a.txt", self.root))
 
+    def test_texture_preview_background_validation(self):
+        self.assertEqual(self.settings()["texturePreviewBackground"], "checkerboard")
+        for value in ("checkerboard", "dark", "light", "#A1b2C3"):
+            with self.subTest(value=value):
+                self.assertEqual(self.settings(texturePreviewBackground=value)["texturePreviewBackground"], value.lower())
+        for value in (None, True, [], "#abc", "#12345678", "url(image.png)"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                self.settings(texturePreviewBackground=value)
+
     def test_parent_is_never_editable(self):
         result = core.resolve_settings({"parentPaths": [str(self.other)]}, [str(self.root), str(self.other)])
         self.assertEqual(result["workspaceMods"], [str(self.root)])
